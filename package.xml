@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>ros_robodk_post_processors</name>
+  <version>0.0.1</version>
+  <description>Industrial robots native code generators</description>
+
+  <author>Victor Lamoine - Institut Maupertuis</author>
+  <maintainer email="victor.lamoine@gmail.com">Victor Lamoine</maintainer>
+  <license>BSD-3-Clause-Attribution</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>rospy</depend>
+  <depend>message_generation</depend>
+  <depend>message_runtime</depend>
+  <depend>std_msgs</depend>
+</package>
