@@ -1,3 +1,6 @@
+string program_name
 
+bool save_files
+string files_saving_dir
 ---
 string native_code

@@ -1,2 +1,2 @@
-- git: {local-name: robodk_postprocessors, uri: 'https://github.com/ros-industrial/robodk_postprocessors.git',
-    version: kinetic-devel}
+- git: {local-name: robodk_postprocessors, uri: 'https://github.com/InstitutMaupertuis/robodk_postprocessors.git',
+    version: melodic}
