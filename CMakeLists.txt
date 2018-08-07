@@ -16,7 +16,12 @@ find_package(catkin REQUIRED COMPONENTS
 
 add_service_files(
   FILES
-  GenerateNativeCodeProgram.srv
+  GenerateNativeCode.srv
+  MoveJ.srv
+  MoveL.srv
+  ProgFinish.srv
+  ProgStart.srv
+  RunMessage.srv
 )
 
 generate_messages(

@@ -1,0 +1,6 @@
+string post_processor
+string program_name
+string program_comment
+---
+# Success if empty
+string error
