@@ -18,10 +18,11 @@ catkin lint:
 catkin_make:
   stage: build
   script:
-    - catkin_make
+    - catkin_make install
 
 # catkin tools
 catkin tools:
   stage: build
   script:
+    - catkin config --install
     - catkin build --summarize --no-status --force-color
