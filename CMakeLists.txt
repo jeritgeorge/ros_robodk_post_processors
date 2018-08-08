@@ -48,9 +48,18 @@ catkin_package(
 ## Install ##
 #############
 
+# RoboDK post processors git submodule
+install(
+  DIRECTORY
+  scripts/robodk_postprocessors/
+  DESTINATION
+  ${CATKIN_PACKAGE_BIN_DESTINATION}/robodk_postprocessors/
+)
+
+# Services servers
 install(
   PROGRAMS
-  scripts/generate_native_code_program.py
+  scripts/services.py
   DESTINATION
   ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
