@@ -1,4 +1,5 @@
-
+geometry_msgs/Pose pose
+float64[] joints
 ---
 # Success if empty
 string error

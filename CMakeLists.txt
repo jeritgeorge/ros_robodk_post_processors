@@ -4,6 +4,7 @@ add_compile_options(-std=c++11 -Wall -Wextra)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
+  geometry_msgs
   message_generation
   message_runtime
   rospy
@@ -26,6 +27,7 @@ add_service_files(
 
 generate_messages(
   DEPENDENCIES
+  geometry_msgs
   std_msgs
 )
 
@@ -39,6 +41,7 @@ generate_messages(
 
 catkin_package(
   CATKIN_DEPENDS
+  geometry_msgs
   message_runtime
   rospy
   std_msgs
