@@ -10,6 +10,7 @@ import rospy
 # FIXME How to handle external axes?
 # FIXME How to add an option on a pose?
 # FIXME How to handle multi-program generation?
+# FIXME How to support modifying every option of each post processor? (options differ between post processors)
 
 # TODO Test adding many commands to hit the maximum number of commands per program
 # TODO Test performance (is using servers a good idea?)
@@ -38,8 +39,17 @@ def move_j(req):
     if pp is None:
         return [pp_not_init]
 
-    # FIXME Implement
-    pp.MoveJ(Pose([200, 200, 500, 180, 0, 180]), [-46.18419, -6.77518, -20.54925, 71.38674, 49.58727, -302.54752])
+    # FIXME Convert and use in MoveJ
+    print(req.pose)
+    #quaternion_2_pose
+    #pose = pose_2_xyzrpw(req.pose)
+    #for i in pose:
+    #  print(i)
+
+    if req.joints != pp.nAxes:
+      return ["Joints tuple does not match the number of axes"]
+
+    pp.MoveJ(Pose([200, 200, 500, 180, 0, 180]), req.joints)
     return [""]
 
 def move_l(req):
@@ -68,7 +78,6 @@ def prog_start(req):
     elif req.post_processor == "Motoman":
         pp = MotomanPost()
         # Default configuration for the Motoman post processor
-        # FIXME How do we support modifying every option of each post processor?
         pp.ACTIVE_TOOL=0
         pp.USE_RELATIVE_JOB=False
     elif req.post_processor == "Fanuc_R30iA":
