@@ -8,13 +8,6 @@ from ros_robodk_post_processors.srv import *
 import geometry_msgs.msg
 import rospy
 
-# FIXME How to handle external axes?
-# FIXME How to add an option on a pose?
-# FIXME How to handle multi-program generation?
-# FIXME How to support modifying every option of each post processor? (options differ between post processors)
-# TODO Test adding many commands to hit the maximum number of commands per program
-# TODO Test performance (is using servers a good idea?)
-
 # The post processor, global variable used in every service server
 pp = None
 
@@ -138,7 +131,7 @@ def prog_start(req):
         pp = MotomanPost()
     elif req.post_processor == "Fanuc_R30iA":
         pp = FanucR30iAPost()
-    # FIXME Add other PP and test them
+    # New post-processors go here
     else:
         return ["'%s' post processor is not supported" % req.post_processor]
 
