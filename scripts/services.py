@@ -98,12 +98,9 @@ def prog_start(req):
         return ["Post processor name is empty"]
     elif req.post_processor == "Motoman":
         pp = MotomanPost()
-        # Default configuration for the Motoman post processor
-        # FIXME Remove
-        #pp.ACTIVE_FRAME = 0
-        #pp.ACTIVE_TOOL = 0
     elif req.post_processor == "Fanuc_R30iA":
         pp = FanucR30iAPost()
+    # FIXME Add other PP and test them
     else:
         return ["%s post processor is not supported" % req.post_processor]
 
