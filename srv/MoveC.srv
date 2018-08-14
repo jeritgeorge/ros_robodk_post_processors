@@ -1,0 +1,10 @@
+geometry_msgs/Pose pose_1
+float64[] joints_1
+uint32[] conf_RLF_1
+
+geometry_msgs/Pose pose_2
+float64[] joints_2
+uint32[] conf_RLF_2
+---
+# Success if empty
+string error

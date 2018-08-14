@@ -1,0 +1,4 @@
+float64 seconds
+---
+# Success if empty
+string error

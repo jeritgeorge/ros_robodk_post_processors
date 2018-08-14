@@ -1,17 +1,17 @@
 #!/usr/bin/env python
-from robodk_postprocessors.robodk import *
+from motoman_services import *
+from robodk_postprocessors.Fanuc_R30iA import RobotPost as FanucR30iAPost
 from robodk_postprocessors.Motoman import Pose
 from robodk_postprocessors.Motoman import RobotPost as MotomanPost
-from robodk_postprocessors.Fanuc_R30iA import RobotPost as FanucR30iAPost
+from robodk_postprocessors.robodk import *
 from ros_robodk_post_processors.srv import *
+import geometry_msgs.msg
 import rospy
 
-# FIXME How to add custom commands for each post processor?
 # FIXME How to handle external axes?
 # FIXME How to add an option on a pose?
 # FIXME How to handle multi-program generation?
 # FIXME How to support modifying every option of each post processor? (options differ between post processors)
-
 # TODO Test adding many commands to hit the maximum number of commands per program
 # TODO Test performance (is using servers a good idea?)
 
@@ -20,6 +20,13 @@ pp = None
 
 # Error message is service is called without initializing a post-processor
 pp_not_init = "No post processor initialized.\nCall prog_start service first."
+
+# From geometry_msgs.Pose to RoboDK.Mat
+def poseToMat(p):
+    quat = [p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w]
+    mat = quaternion_2_pose(quat)
+    mat.setPos([p.position.x, p.position.y, p.position.z])
+    return mat
 
 def generate_native_code(req):
     global pp
@@ -39,17 +46,11 @@ def move_j(req):
     if pp is None:
         return [pp_not_init]
 
-    # FIXME Convert and use in MoveJ
-    print(req.pose)
-    #quaternion_2_pose
-    #pose = pose_2_xyzrpw(req.pose)
-    #for i in pose:
-    #  print(i)
-
-    if req.joints != pp.nAxes:
+    if len(req.joints) != pp.nAxes:
       return ["Joints tuple does not match the number of axes"]
 
-    pp.MoveJ(Pose([200, 200, 500, 180, 0, 180]), req.joints)
+    p = poseToMat(req.pose)
+    pp.MoveJ(p, req.joints, list(req.conf_RLF))
     return [""]
 
 def move_l(req):
@@ -57,8 +58,26 @@ def move_l(req):
     if pp is None:
         return [pp_not_init]
 
-    # FIXME Implement
-    pp.MoveL(Pose([200, 200, 500, 180, 0, 180]), [-46.18419, -6.77518, -20.54925, 71.38674, 49.58727, -302.54752])
+    if len(req.joints) != pp.nAxes:
+      return ["Joints tuple does not match the number of axes"]
+
+    p = poseToMat(req.pose)
+    pp.MoveL(p, req.joints, list(req.conf_RLF))
+    return [""]
+
+def move_c(req):
+    global pp
+    if pp is None:
+        return [pp_not_init]
+
+    if len(req.joints_1) != pp.nAxes:
+      return ["Joints tuple does not match the number of axes"]
+    if len(req.joints_2) != pp.nAxes:
+      return ["Joints tuple does not match the number of axes"]
+
+    p1 = poseToMat(req.pose_1)
+    p2 = poseToMat(req.pose_2)
+    pp.MoveC(p1, req.joints_1, p2, req.joints_2, list(req.conf_RLF_1), list(req.conf_RLF_2))
     return [""]
 
 def prog_finish(req):
@@ -73,13 +92,16 @@ def prog_finish(req):
 
 def prog_start(req):
     global pp
+    pp = None
+
     if len(req.post_processor) is 0:
         return ["Post processor name is empty"]
     elif req.post_processor == "Motoman":
         pp = MotomanPost()
         # Default configuration for the Motoman post processor
-        pp.ACTIVE_TOOL=0
-        pp.USE_RELATIVE_JOB=False
+        # FIXME Remove
+        #pp.ACTIVE_FRAME = 0
+        #pp.ACTIVE_TOOL = 0
     elif req.post_processor == "Fanuc_R30iA":
         pp = FanucR30iAPost()
     else:
@@ -101,15 +123,49 @@ def run_message(req):
     pp.RunMessage(req.msg)
     return [""]
 
+def pause(req):
+    global pp
+    if pp is None:
+        return [pp_not_init]
+
+    if req.seconds <= 0.0:
+      return ["Pause cannot be zero or negative"];
+
+    pp.Pause(req.seconds * 1000)
+    return [""]
+
+def set_tool(req):
+    global pp
+    if pp is None:
+        return [pp_not_init]
+
+    p = poseToMat(req.pose)
+    pp.setTool(p, req.tool_id, req.tool_name)
+    return [""]
+
+def set_frame(req):
+    global pp
+    if pp is None:
+        return [pp_not_init]
+
+    p = poseToMat(req.pose)
+    pp.setFrame(p, req.frame_id, req.frame_name)
+    return [""]
+
 def services_servers():
     rospy.init_node('ros_robodk_post_processors')
     service_prefix = 'robodk_post_processors/'
     services = [rospy.Service(service_prefix + 'generate_native_code', GenerateNativeCode, generate_native_code)]
     services.append(rospy.Service(service_prefix + 'move_j', MoveJ, move_j))
     services.append(rospy.Service(service_prefix + 'move_l', MoveL, move_l))
+    services.append(rospy.Service(service_prefix + 'move_c', MoveC, move_c))
     services.append(rospy.Service(service_prefix + 'prog_finish', ProgFinish, prog_finish))
     services.append(rospy.Service(service_prefix + 'prog_start', ProgStart, prog_start))
     services.append(rospy.Service(service_prefix + 'run_message', RunMessage, run_message))
+    services.append(rospy.Service(service_prefix + 'pause', Pause, pause))
+    services.append(rospy.Service(service_prefix + 'set_tool', SetTool, set_tool))
+    services.append(rospy.Service(service_prefix + 'set_frame', SetFrame, set_frame))
+    motomanServices(service_prefix, services)
     for s in services:
         rospy.loginfo("Service %s ready", s.resolved_name)
     rospy.spin()

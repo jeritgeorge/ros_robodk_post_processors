@@ -1,6 +1,6 @@
+uint32 tool_id
+string tool_name
 geometry_msgs/Pose pose
-float64[] joints
-uint32[] conf_RLF
 ---
 # Success if empty
 string error
