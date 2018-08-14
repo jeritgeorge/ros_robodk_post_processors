@@ -1,0 +1,8 @@
+string robot_ip
+string remote_path
+string ftp_user
+string ftp_pass
+---
+# Success if empty
+string error
+

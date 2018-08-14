@@ -17,16 +17,20 @@ find_package(catkin REQUIRED COMPONENTS
 
 add_service_files(
   FILES
-  GenerateNativeCode.srv
   MoveC.srv
   MoveJ.srv
   MoveL.srv
   Pause.srv
   ProgFinish.srv
+  ProgSave.srv
+  ProgSendRobot.srv
   ProgStart.srv
+  RunCode.srv
   RunMessage.srv
+  SetDO.srv
   SetFrame.srv
   SetTool.srv
+  WaitDI.srv
 )
 
 # Motoman specifics

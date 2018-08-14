@@ -1,0 +1,5 @@
+string code
+bool is_function_call
+---
+# Success if empty
+string error

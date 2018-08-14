@@ -1,0 +1,6 @@
+string io_var
+bool io_value
+int32 timeout_ms # milliseconds
+---
+# Success if empty
+string error
