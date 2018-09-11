@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   message_runtime
   rospy
+  rostest
   std_msgs
 )
 
@@ -15,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Declare ROS messages, services and actions ##
 ################################################
 
+# Common services to all post-processors
 add_service_files(
   FILES
   MoveC.srv
@@ -86,3 +88,11 @@ install(
 #############
 ## Testing ##
 #############
+
+if(CATKIN_ENABLE_TESTING)
+  add_rostest(
+    test/motoman.launch
+    DEPENDENCIES
+    ${PROJECT_NAME}_generate_messages_cpp
+  )
+endif()

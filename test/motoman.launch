@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="ros_robodk_post_processors" name="services" type="services.py" />
+  <test pkg="ros_robodk_post_processors" test-name="motoman" type="motoman.py" />
+</launch>
