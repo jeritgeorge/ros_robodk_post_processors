@@ -13,11 +13,14 @@ def motomanServices(service_prefix, services):
     services.append(rospy.Service(service_prefix + motoman_prefix + 'arcon', Arcon, arcon))
     services.append(rospy.Service(service_prefix + motoman_prefix + 'macro', Macro, macro))
 
+# FIXME
 def arcof():
     pass
 
+# FIXME
 def arcon():
     pass
 
+# FIXME
 def macro():
     pass
