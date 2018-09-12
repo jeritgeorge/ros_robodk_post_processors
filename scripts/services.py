@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from motoman_services import *
 from robodk_postprocessors.Fanuc_R30iA import RobotPost as FanucR30iAPost
 from robodk_postprocessors.Motoman import Pose
 from robodk_postprocessors.Motoman import RobotPost as MotomanPost
@@ -209,6 +208,44 @@ def wait_di(req):
 
     return [""]
 
+# Motoman
+def motomanServices(service_prefix, services):
+    motoman_prefix = 'motoman/'
+    services.append(rospy.Service(service_prefix + motoman_prefix + 'arcof', Arcof, arcof))
+    services.append(rospy.Service(service_prefix + motoman_prefix + 'arcon', Arcon, arcon))
+    services.append(rospy.Service(service_prefix + motoman_prefix + 'macro', Macro, macro))
+
+def arcof(req):
+    global pp
+    if pp is None:
+        return [pp_not_init]
+
+    pp.Arcof(req.aef_file)
+    return [""]
+
+def arcon(req):
+    global pp
+    if pp is None:
+        return [pp_not_init]
+
+    pp.Arcon(req.asf_file)
+    return [""]
+
+def macro(req):
+    global pp
+    if pp is None:
+        return [pp_not_init]
+
+    if req.number is 0:
+        return ["number cannot be zero"]
+
+    if req.mf is 0:
+        return ["mdf cannot be zero"]
+
+    pp.Macro(req.number, req.mf, req.args)
+    return [""]
+
+# Common services
 def services_servers():
     rospy.init_node('ros_robodk_post_processors')
     service_prefix = 'robodk_post_processors/'

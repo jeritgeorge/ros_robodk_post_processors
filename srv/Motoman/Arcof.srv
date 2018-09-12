@@ -1,3 +1,4 @@
+uint16 aef_file
 ---
 # Success if empty
 string error

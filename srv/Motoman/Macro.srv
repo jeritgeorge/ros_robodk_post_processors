@@ -1,3 +1,6 @@
+uint16 number
+uint16 mf
+float32[] args # Only float arguments are supported
 ---
 # Success if empty
 string error
