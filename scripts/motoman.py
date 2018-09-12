@@ -6,15 +6,28 @@ import config
 import geometry_msgs.msg
 import rospy
 
+not_motoman = "Cannot use on a non Motoman post processor"
+
 def services(service_prefix, services):
     motoman_prefix = 'motoman/'
     services.append(rospy.Service(service_prefix + motoman_prefix + 'arcof', Arcof, arcof))
     services.append(rospy.Service(service_prefix + motoman_prefix + 'arcon', Arcon, arcon))
     services.append(rospy.Service(service_prefix + motoman_prefix + 'macro', Macro, macro))
 
+def isMotomanPP():
+    if config.pp is None:
+      return False
+
+    if config.pp.PROG_EXT != "JBI":
+      return False
+
+    return True
+
 def arcof(req):
     if config.pp is None:
         return [config.pp_not_init]
+    if not isMotomanPP():
+        return [not_motoman]
 
     config.pp.Arcof(req.aef_file)
     return [""]
@@ -22,6 +35,8 @@ def arcof(req):
 def arcon(req):
     if config.pp is None:
         return [config.pp_not_init]
+    if not isMotomanPP():
+        return [not_motoman]
 
     config.pp.Arcon(req.asf_file)
     return [""]
@@ -29,6 +44,8 @@ def arcon(req):
 def macro(req):
     if config.pp is None:
         return [config.pp_not_init]
+    if not isMotomanPP():
+        return [not_motoman]
 
     if req.number is 0:
         return ["number cannot be zero"]
