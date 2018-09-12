@@ -4,14 +4,10 @@ from robodk_postprocessors.Motoman import Pose
 from robodk_postprocessors.Motoman import RobotPost as MotomanPost
 from robodk_postprocessors.robodk import *
 from ros_robodk_post_processors.srv import *
+import config
 import geometry_msgs.msg
+import motoman
 import rospy
-
-# The post processor, global variable used in every service server
-pp = None
-
-# Error message if a service is called prior to initializing a post-processor
-pp_not_init = "No post processor initialized.\nCall prog_start service first."
 
 # From geometry_msgs.Pose to RoboDK.Mat
 def poseToMat(p):
@@ -21,13 +17,12 @@ def poseToMat(p):
     return mat
 
 def move_c(req):
-    global pp
-    if pp is None:
-        return [pp_not_init]
+    if config.pp is None:
+        return [config.pp_not_init]
 
-    if len(req.joints_1) != pp.nAxes:
+    if len(req.joints_1) != config.pp.nAxes:
         return ["Joints tuple does not match the number of axes"]
-    if len(req.joints_2) != pp.nAxes:
+    if len(req.joints_2) != config.pp.nAxes:
         return ["Joints tuple does not match the number of axes"]
     if len(req.conf_RLF_1) != 3:
         return ["conf_RLF_1 size must be 3"]
@@ -36,69 +31,64 @@ def move_c(req):
 
     p1 = poseToMat(req.pose_1)
     p2 = poseToMat(req.pose_2)
-    pp.MoveC(p1, req.joints_1, p2, req.joints_2, list(req.conf_RLF_1), list(req.conf_RLF_2))
+    config.pp.MoveC(p1, req.joints_1, p2, req.joints_2, list(req.conf_RLF_1), list(req.conf_RLF_2))
     return [""]
 
 def move_j(req):
-    global pp
-    if pp is None:
-        return [pp_not_init]
+    if config.pp is None:
+        return [config.pp_not_init]
 
-    if len(req.joints) != pp.nAxes:
+    if len(req.joints) != config.pp.nAxes:
         return ["Joints tuple does not match the number of axes"]
     if len(req.conf_RLF) != 3:
         return ["conf_RLF size must be 3"]
 
     p = poseToMat(req.pose)
-    pp.MoveJ(p, req.joints, list(req.conf_RLF))
+    config.pp.MoveJ(p, req.joints, list(req.conf_RLF))
     return [""]
 
 def move_l(req):
-    global pp
-    if pp is None:
-        return [pp_not_init]
+    if config.pp is None:
+        return [config.pp_not_init]
 
-    if len(req.joints) != pp.nAxes:
+    if len(req.joints) != config.pp.nAxes:
         return ["Joints tuple does not match the number of axes"]
     if len(req.conf_RLF) != 3:
         return ["conf_RLF size must be 3"]
 
     p = poseToMat(req.pose)
-    pp.MoveL(p, req.joints, list(req.conf_RLF))
+    config.pp.MoveL(p, req.joints, list(req.conf_RLF))
     return [""]
 
 def pause(req):
-    global pp
-    if pp is None:
-        return [pp_not_init]
+    if config.pp is None:
+        return [config.pp_not_init]
 
     if req.seconds <= 0.0:
         return ["Pause cannot be zero or negative"];
 
-    pp.Pause(req.seconds * 1000)
+    config.pp.Pause(req.seconds * 1000)
     return [""]
 
 def prog_finish(req):
-    global pp
-    if pp is None:
-        return [pp_not_init]
+    if config.pp is None:
+        return [config.pp_not_init]
 
-    pp.ProgFinish(req.program_name)
-    if len(pp.LOG) > 0:
-        return [pp.LOG, ""]
+    config.pp.ProgFinish(req.program_name)
+    if len(config.pp.LOG) > 0:
+        return [config.pp.LOG, ""]
 
     program=''
-    for line in pp.PROG_LIST[-1]:
+    for line in config.pp.PROG_LIST[-1]:
         program += line
     return ["", program]
 
 def prog_save(req):
-    global pp
-    if pp is None:
-        return [pp_not_init, ""]
+    if config.pp is None:
+        return [config.pp_not_init, ""]
 
     program=''
-    for line in pp.PROG_LIST[-1]:
+    for line in config.pp.PROG_LIST[-1]:
         program += line
 
     if req.save_file:
@@ -106,143 +96,98 @@ def prog_save(req):
             return ["program_name cannot be empty", ""]
         if not req.file_saving_dir:
             return ["file_saving_dir cannot be empty", ""]
-        pp.ProgSave(req.file_saving_dir, req.program_name)
+        config.pp.ProgSave(req.file_saving_dir, req.program_name)
     return ["", program]
 
 def prog_send_robot(req):
-    global pp
-    if pp is None:
-        return [pp_not_init, ""]
+    if config.pp is None:
+        return [config.pp_not_init, ""]
 
     if not req.robot_ip:
         return ["robot_ip cannot be empty"]
 
-    pp.ProgSendRobot(req.robot_ip, req.remote_path, req.ftp_user, req.ftp_pass)
+    config.pp.ProgSendRobot(req.robot_ip, req.remote_path, req.ftp_user, req.ftp_pass)
     return [""]
 
 def prog_start(req):
-    global pp
-    pp = None
+    config.pp = None
 
     if len(req.post_processor) is 0:
         return ["Post processor name is empty"]
     elif req.post_processor == "Motoman":
-        pp = MotomanPost()
+        config.pp = MotomanPost()
     elif req.post_processor == "Fanuc_R30iA":
-        pp = FanucR30iAPost()
+        config.pp = FanucR30iAPost()
     # New post-processors go here
     else:
         return ["'%s' post processor is not supported" % req.post_processor]
 
     if len(req.program_name) is 0:
         return ["Program name is empty"]
-    pp.ProgStart(req.program_name)
+    config.pp.ProgStart(req.program_name)
 
     # Program comment can be empty
-    pp.PROG_COMMENT = req.program_comment
+    config.pp.PROG_COMMENT = req.program_comment
     return [""]
 
 def run_message(req):
-    global pp
-    if pp is None:
-        return [pp_not_init]
+    if config.pp is None:
+        return [config.pp_not_init]
 
     if not req.msg:
         return ["message cannot be empty"]
 
-    pp.RunMessage(req.msg)
+    config.pp.RunMessage(req.msg)
     return [""]
 
 def run_code(req):
-    global pp
-    if pp is None:
-        return [pp_not_init]
+    if config.pp is None:
+        return [config.pp_not_init]
 
     if not req.code:
         return ["code cannot be empty"]
 
-    pp.RunCode(req.code, req.is_function_call)
+    config.pp.RunCode(req.code, req.is_function_call)
     return [""]
 
 def set_do(req): # set Digital Output
-    global pp
-    if pp is None:
-        return [pp_not_init]
+    if config.pp is None:
+        return [config.pp_not_init]
 
     try:
         var = int(req.io_var)
-        pp.setDO(var, req.io_value)
+        config.pp.setDO(var, req.io_value)
     except ValueError:
-        pp.setDO(req.io_var, req.io_value)
+        config.pp.setDO(req.io_var, req.io_value)
 
     return [""]
 
 def set_frame(req):
-    global pp
-    if pp is None:
-        return [pp_not_init]
+    if config.pp is None:
+        return [config.pp_not_init]
 
     p = poseToMat(req.pose)
-    pp.setFrame(p, req.frame_id, req.frame_name)
+    config.pp.setFrame(p, req.frame_id, req.frame_name)
     return [""]
 
 def set_tool(req):
-    global pp
-    if pp is None:
-        return [pp_not_init]
+    if config.pp is None:
+        return [config.pp_not_init]
 
     p = poseToMat(req.pose)
-    pp.setTool(p, req.tool_id, req.tool_name)
+    config.pp.setTool(p, req.tool_id, req.tool_name)
     return [""]
 
 def wait_di(req):
-    global pp
-    if pp is None:
-        return [pp_not_init]
+    if config.pp is None:
+        return [config.pp_not_init]
 
     try:
         var = int(req.io_var)
-        pp.waitDI(var, req.io_value, req.timeout_ms)
+        config.pp.waitDI(var, req.io_value, req.timeout_ms)
     except ValueError:
-        pp.waitDI(req.io_var, req.io_value, req.timeout_ms)
+        config.pp.waitDI(req.io_var, req.io_value, req.timeout_ms)
 
-    return [""]
-
-# Motoman
-def motomanServices(service_prefix, services):
-    motoman_prefix = 'motoman/'
-    services.append(rospy.Service(service_prefix + motoman_prefix + 'arcof', Arcof, arcof))
-    services.append(rospy.Service(service_prefix + motoman_prefix + 'arcon', Arcon, arcon))
-    services.append(rospy.Service(service_prefix + motoman_prefix + 'macro', Macro, macro))
-
-def arcof(req):
-    global pp
-    if pp is None:
-        return [pp_not_init]
-
-    pp.Arcof(req.aef_file)
-    return [""]
-
-def arcon(req):
-    global pp
-    if pp is None:
-        return [pp_not_init]
-
-    pp.Arcon(req.asf_file)
-    return [""]
-
-def macro(req):
-    global pp
-    if pp is None:
-        return [pp_not_init]
-
-    if req.number is 0:
-        return ["number cannot be zero"]
-
-    if req.mf is 0:
-        return ["mdf cannot be zero"]
-
-    pp.Macro(req.number, req.mf, req.args)
     return [""]
 
 # Common services
@@ -274,7 +219,7 @@ def services_servers():
     # setZoneData
 
     # Brand specific services
-    motomanServices(service_prefix, services)
+    motoman.services(service_prefix, services)
 
     # Display all services advertised
     for s in services:
