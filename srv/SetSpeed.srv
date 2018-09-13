@@ -1,0 +1,5 @@
+# Speed in millimeters/second
+float64 mm_sec
+---
+# Success if empty
+string error

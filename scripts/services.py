@@ -170,12 +170,33 @@ def set_frame(req):
     config.pp.setFrame(p, req.frame_id, req.frame_name)
     return [""]
 
+def set_speed(req):
+    if config.pp is None:
+        return [config.pp_not_init]
+
+    config.pp.setSpeed(req.mm_sec)
+    return [""]
+
+def set_speed_joints(req):
+    if config.pp is None:
+        return [config.pp_not_init]
+
+    config.pp.setSpeedJoints(req.deg_sec)
+    return [""]
+
 def set_tool(req):
     if config.pp is None:
         return [config.pp_not_init]
 
     p = poseToMat(req.pose)
     config.pp.setTool(p, req.tool_id, req.tool_name)
+    return [""]
+
+def set_zone_data(req):
+    if config.pp is None:
+        return [config.pp_not_init]
+
+    config.pp.setZoneData(req.zone_mm)
     return [""]
 
 def wait_di(req):
@@ -209,8 +230,12 @@ def services_servers():
     services.append(rospy.Service(service_prefix + 'run_message', RunMessage, run_message))
     services.append(rospy.Service(service_prefix + 'set_do', SetDO, set_do))
     services.append(rospy.Service(service_prefix + 'set_frame', SetFrame, set_frame))
+    services.append(rospy.Service(service_prefix + 'set_speed', SetSpeed, set_speed))
+    services.append(rospy.Service(service_prefix + 'set_speed_joints', SetSpeedJoints, set_speed_joints))
     services.append(rospy.Service(service_prefix + 'set_tool', SetTool, set_tool))
+    services.append(rospy.Service(service_prefix + 'set_zone_data', SetZoneData, set_zone_data))
     services.append(rospy.Service(service_prefix + 'wait_di', WaitDI, wait_di))
+
     # Not implemented:
     # setSpeed
     # setAcceleration
