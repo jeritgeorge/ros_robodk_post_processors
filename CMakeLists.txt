@@ -31,7 +31,10 @@ add_service_files(
   RunMessage.srv
   SetDO.srv
   SetFrame.srv
+  SetSpeedJoints.srv
+  SetSpeed.srv
   SetTool.srv
+  SetZoneData.srv
   WaitDI.srv
 )
 

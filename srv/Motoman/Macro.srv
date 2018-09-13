@@ -1,6 +1,9 @@
 uint16 number
 uint16 mf
 float32[] args # Only float arguments are supported
+
+# Syntax is:
+# MACRO$number MJ#($mf) ARGF$args[0] ARGF$args[1] ...
 ---
 # Success if empty
 string error

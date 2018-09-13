@@ -1,0 +1,5 @@
+# In millimeters
+float64 zone_mm
+---
+# Success if empty
+string error

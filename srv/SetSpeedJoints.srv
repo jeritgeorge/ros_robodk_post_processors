@@ -1,0 +1,5 @@
+# Speed in degrees/second
+float64 deg_sec
+---
+# Success if empty
+string error
