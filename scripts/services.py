@@ -91,12 +91,11 @@ def prog_save(req):
     for line in config.pp.PROG_LIST[-1]:
         program += line
 
-    if req.save_file:
-        if not req.program_name:
-            return ["program_name cannot be empty", ""]
-        if not req.file_saving_dir:
-            return ["file_saving_dir cannot be empty", ""]
-        config.pp.ProgSave(req.file_saving_dir, req.program_name)
+    if not req.program_name:
+        return ["program_name cannot be empty", ""]
+    if not req.file_saving_dir:
+        return ["file_saving_dir cannot be empty", ""]
+    config.pp.ProgSave(req.file_saving_dir, req.program_name)
     return ["", program]
 
 def prog_send_robot(req):

@@ -5,4 +5,3 @@ string ftp_pass
 ---
 # Success if empty
 string error
-

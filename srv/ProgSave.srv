@@ -1,7 +1,5 @@
 string program_name
 
-# Whether the native code should be saved on the disk
-bool save_file
 # Where the native code should be saved on the disk
 string file_saving_dir
 ---
