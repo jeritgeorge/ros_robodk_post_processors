@@ -16,6 +16,12 @@ def poseToMat(p):
     mat.setPos([p.position.x, p.position.y, p.position.z])
     return mat
 
+# Check if pose is initialized
+def poseInitialized(p):
+    if p.orientation.x == 0 and p.orientation.y == 0 and p.orientation.z == 0 and p.orientation.w == 0:
+        return False
+    return True
+
 def move_c(req):
     if config.pp is None:
         return [config.pp_not_init]
@@ -29,6 +35,10 @@ def move_c(req):
     if len(req.conf_RLF_2) != 3:
         return ["conf_RLF_2 size must be 3"]
 
+    if not poseInitialized(req.p1):
+        return ["Pose 1 quaternions are not initialized"]
+    if not poseInitialized(req.p2):
+        return ["Pose 2 quaternions are not initialized"]
     p1 = poseToMat(req.pose_1)
     p2 = poseToMat(req.pose_2)
     config.pp.MoveC(p1, req.joints_1, p2, req.joints_2, list(req.conf_RLF_1), list(req.conf_RLF_2))
@@ -43,6 +53,8 @@ def move_j(req):
     if len(req.conf_RLF) != 3:
         return ["conf_RLF size must be 3"]
 
+    if not poseInitialized(req.pose):
+        return ["Pose quaternions are not initialized"]
     p = poseToMat(req.pose)
     config.pp.MoveJ(p, req.joints, list(req.conf_RLF))
     return [""]
@@ -56,6 +68,8 @@ def move_l(req):
     if len(req.conf_RLF) != 3:
         return ["conf_RLF size must be 3"]
 
+    if not poseInitialized(req.pose):
+        return ["Pose quaternions are not initialized"]
     p = poseToMat(req.pose)
     config.pp.MoveL(p, req.joints, list(req.conf_RLF))
     return [""]
@@ -87,6 +101,9 @@ def prog_save(req):
     if config.pp is None:
         return [config.pp_not_init, ""]
 
+    if len(config.pp.PROG_LIST) is 0:
+        return ["Program list is empty", ""]
+
     program=''
     for line in config.pp.PROG_LIST[-1]:
         program += line
@@ -109,8 +126,6 @@ def prog_send_robot(req):
     return [""]
 
 def prog_start(req):
-    config.pp = None
-
     if len(req.post_processor) is 0:
         return ["Post processor name is empty"]
     elif req.post_processor == "Motoman":
@@ -121,12 +136,15 @@ def prog_start(req):
     else:
         return ["'%s' post processor is not supported" % req.post_processor]
 
+    config.pp.PROG_TARGETS = []
+
     if len(req.program_name) is 0:
         return ["Program name is empty"]
     config.pp.ProgStart(req.program_name)
 
-    # Program comment can be empty
+    # Program comment is allowed to be empty
     config.pp.PROG_COMMENT = req.program_comment
+
     return [""]
 
 def run_message(req):
@@ -165,6 +183,8 @@ def set_frame(req):
     if config.pp is None:
         return [config.pp_not_init]
 
+    if not poseInitialized(req.pose):
+        return ["Pose quaternions are not initialized"]
     p = poseToMat(req.pose)
     config.pp.setFrame(p, req.frame_id, req.frame_name)
     return [""]
@@ -187,6 +207,8 @@ def set_tool(req):
     if config.pp is None:
         return [config.pp_not_init]
 
+    if not poseInitialized(req.pose):
+        return ["Pose quaternions are not initialized"]
     p = poseToMat(req.pose)
     config.pp.setTool(p, req.tool_id, req.tool_name)
     return [""]
