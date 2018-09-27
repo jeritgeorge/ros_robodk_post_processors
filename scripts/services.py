@@ -130,6 +130,7 @@ def prog_start(req):
         return ["Post processor name is empty"]
     elif req.post_processor == "Motoman":
         config.pp = MotomanPost()
+        config.pp.LAST_CONFDATA = [None, None, None, None] # Reset last configuration
     elif req.post_processor == "Fanuc_R30iA":
         config.pp = FanucR30iAPost()
     # New post-processors go here
