@@ -13,6 +13,7 @@ def services(service_prefix, services):
     services.append(rospy.Service(service_prefix + motoman_prefix + 'arcof', Arcof, arcof))
     services.append(rospy.Service(service_prefix + motoman_prefix + 'arcon', Arcon, arcon))
     services.append(rospy.Service(service_prefix + motoman_prefix + 'macro', Macro, macro))
+    services.append(rospy.Service(service_prefix + motoman_prefix + 'dont_use_mframe', DontUseMFrame, dontUseMFrame))
 
 def isMotomanPP():
     if config.pp is None:
@@ -54,4 +55,13 @@ def macro(req):
         return ["mdf cannot be zero"]
 
     config.pp.Macro(req.number, req.mf, req.args)
+    return [""]
+
+def dontUseMFrame(req):
+    if config.pp is None:
+        return [config.pp_not_init]
+    if not isMotomanPP():
+        return [not_motoman]
+
+    config.pp.DONT_USE_MFRAME = req.value;
     return [""]
