@@ -44,6 +44,7 @@ add_service_files(
   Motoman/Arcof.srv
   Motoman/Arcon.srv
   Motoman/Macro.srv
+  Motoman/DontUseMFrame.srv
 )
 
 generate_messages(

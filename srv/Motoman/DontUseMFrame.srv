@@ -1,0 +1,4 @@
+bool value
+---
+# Success if empty
+string error
