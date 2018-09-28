@@ -13,7 +13,7 @@ import rospy
 def poseToMat(p):
     quat = [p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w]
     mat = quaternion_2_pose(quat)
-    mat.setPos([p.position.x, p.position.y, p.position.z])
+    mat.setPos([p.position.x * 1000, p.position.y * 1000, p.position.z * 1000])
     return mat
 
 # Check if pose is initialized
