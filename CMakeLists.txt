@@ -31,8 +31,8 @@ add_service_files(
   RunMessage.srv
   SetDO.srv
   SetFrame.srv
-  SetSpeedJoints.srv
   SetSpeed.srv
+  SetSpeedJoints.srv
   SetTool.srv
   SetZoneData.srv
   WaitDI.srv
@@ -43,8 +43,8 @@ add_service_files(
   FILES
   Motoman/Arcof.srv
   Motoman/Arcon.srv
-  Motoman/Macro.srv
   Motoman/DontUseMFrame.srv
+  Motoman/Macro.srv
 )
 
 generate_messages(
