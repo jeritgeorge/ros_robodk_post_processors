@@ -14,6 +14,7 @@ def services(service_prefix, services):
     services.append(rospy.Service(service_prefix + motoman_prefix + 'arcon', Arcon, arcon))
     services.append(rospy.Service(service_prefix + motoman_prefix + 'macro', Macro, macro))
     services.append(rospy.Service(service_prefix + motoman_prefix + 'dont_use_mframe', DontUseMFrame, dontUseMFrame))
+    services.append(rospy.Service(service_prefix + motoman_prefix + 'set_folder', SetFolder, setFolder))
 
 def isMotomanPP():
     if config.pp is None:
@@ -64,4 +65,13 @@ def dontUseMFrame(req):
         return [not_motoman]
 
     config.pp.DONT_USE_MFRAME = req.value;
+    return [""]
+
+def setFolder(req):
+    if config.pp is None:
+        return [config.pp_not_init]
+    if not isMotomanPP():
+        return [not_motoman]
+
+    config.pp.SetFolder(req.folder)
     return [""]

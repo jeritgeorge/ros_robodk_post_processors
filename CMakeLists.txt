@@ -45,6 +45,7 @@ add_service_files(
   Motoman/Arcon.srv
   Motoman/DontUseMFrame.srv
   Motoman/Macro.srv
+  Motoman/SetFolder.srv
 )
 
 generate_messages(
@@ -84,6 +85,8 @@ install(
 # Services servers
 install(
   PROGRAMS
+  scripts/config.py
+  scripts/motoman.py
   scripts/services.py
   DESTINATION
   ${CATKIN_PACKAGE_BIN_DESTINATION}
