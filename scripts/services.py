@@ -11,7 +11,8 @@ import rospy
 
 # From geometry_msgs.Pose to RoboDK.Mat
 def poseToMat(p):
-    quat = [p.orientation.x, p.orientation.y, p.orientation.z, p.orientation.w]
+    # Warning: Quaternion initialization order: w, x, y, z
+    quat = [p.orientation.w, p.orientation.x, p.orientation.y, p.orientation.z]
     mat = quaternion_2_pose(quat)
     mat.setPos([p.position.x * 1000, p.position.y * 1000, p.position.z * 1000])
     return mat
@@ -70,6 +71,7 @@ def move_l(req):
 
     if not poseInitialized(req.pose):
         return ["Pose quaternions are not initialized"]
+
     p = poseToMat(req.pose)
     config.pp.MoveL(p, req.joints, list(req.conf_RLF))
     return [""]
