@@ -69,6 +69,7 @@ catkin_package(
   geometry_msgs
   message_runtime
   rospy
+  rostest
   std_msgs
 )
 
@@ -100,7 +101,7 @@ install(
 
 if(CATKIN_ENABLE_TESTING)
   add_rostest(
-    test/motoman.launch
+    test/services.launch
     DEPENDENCIES
     ${PROJECT_NAME}_generate_messages_cpp
   )

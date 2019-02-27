@@ -32,10 +32,6 @@ catkin_make
 ```
 
 # Testing
-Launch the service servers node
 ```bash
-roscore &
-rosrun ros_robodk_post_processors services.py
+catkin_make run_tests
 ```
-
-Example bash scripts to generate programs: [test](test)

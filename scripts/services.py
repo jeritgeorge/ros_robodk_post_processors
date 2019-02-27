@@ -36,9 +36,9 @@ def move_c(req):
     if len(req.conf_RLF_2) != 3:
         return ["conf_RLF_2 size must be 3"]
 
-    if not poseInitialized(req.p1):
+    if not poseInitialized(req.pose_1):
         return ["Pose 1 quaternions are not initialized"]
-    if not poseInitialized(req.p2):
+    if not poseInitialized(req.pose_2):
         return ["Pose 2 quaternions are not initialized"]
     p1 = poseToMat(req.pose_1)
     p2 = poseToMat(req.pose_2)
