@@ -1,10 +1,12 @@
 image: ros:melodic-robot
 
+variables:
+  GIT_SUBMODULE_STRATEGY: normal
+
 before_script:
   - git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
   - source ros_gitlab_ci/gitlab-ci.bash >/dev/null
 
-# catkin_lint
 catkin lint:
   stage: build
   image: ros:melodic-ros-core
@@ -14,15 +16,22 @@ catkin lint:
   script:
     - catkin_lint -W3 .
 
-# catkin_make
 catkin_make:
   stage: build
   script:
     - catkin_make install
 
-# catkin tools
 catkin tools:
   stage: build
   script:
     - catkin config --install
     - catkin build --summarize --no-status --force-color
+
+catkin_make tests:
+  stage: test
+  script:
+    - catkin_make >/dev/null
+    - source devel/setup.bash
+    - catkin_make tests >/dev/null
+    - catkin_make run_tests
+    - catkin_test_results # Check if one of the tests failed!

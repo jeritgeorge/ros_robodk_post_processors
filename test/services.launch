@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="ros_robodk_post_processors" name="services" type="services.py" />
+  <test pkg="ros_robodk_post_processors" test-name="services_tests" type="services_tests.py" />
+</launch>
