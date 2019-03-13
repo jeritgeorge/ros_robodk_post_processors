@@ -25,11 +25,6 @@ class ServicesTests(unittest.TestCase):
             service = service_base_name + name
             self.assertEquals(checkService(service), True, "Service %s is not available!" % service)
 
-        motoman_services = ["motoman/arcof", "motoman/arcon", "motoman/macro", "motoman/dont_use_mframe", "motoman/set_folder"]
-        for name in motoman_services:
-            service = service_base_name + name
-            self.assertEquals(checkService(service), True, "Service %s is not available!" % service)
-
     def testMotomanProgram(self):
         rospy.wait_for_service(service_base_name + "prog_start")
         rospy.wait_for_service(service_base_name + "set_tool")
@@ -46,22 +41,22 @@ class ServicesTests(unittest.TestCase):
         rospy.wait_for_service(service_base_name + "run_message")
         rospy.wait_for_service(service_base_name + "wait_di")
         rospy.wait_for_service(service_base_name + "run_code")
-        rospy.wait_for_service(service_base_name + "motoman/macro")
-        rospy.wait_for_service(service_base_name + "motoman/arcon")
-        rospy.wait_for_service(service_base_name + "motoman/arcof")
         rospy.wait_for_service(service_base_name + "prog_finish")
+        rospy.wait_for_service(service_base_name + "prog_save")
 
+        #------prog_start-----
         service = service_base_name + "prog_start"
         srv = rospy.ServiceProxy(service, ProgStart)
         success = False
         try:
-            resp = srv("Motoman", "test", "")
+            resp = srv("Fanuc_R30iA", "test", "")
             success = True
         except rospy.ServiceException as exc:
             rospy.logerr("Service did not process request: " + str(exc))
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
+        #------set_tool-----
         service = service_base_name + "set_tool"
         srv = rospy.ServiceProxy(service, SetTool)
         success = False
@@ -73,6 +68,7 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
+        #------set_frame-----
         service = service_base_name + "set_frame"
         srv = rospy.ServiceProxy(service, SetFrame)
         success = False
@@ -84,6 +80,8 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
+
+        #------move_c-----
         service = service_base_name + "move_c"
         srv = rospy.ServiceProxy(service, MoveC)
         success = False
@@ -100,6 +98,8 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
+
+        #------set_speed_joints-----
         service = service_base_name + "set_speed_joints"
         srv = rospy.ServiceProxy(service, SetSpeedJoints)
         success = False
@@ -111,6 +111,7 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
+        #------move_j-----
         service = service_base_name + "move_j"
         srv = rospy.ServiceProxy(service, MoveJ)
         success = False
@@ -124,6 +125,7 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
+        #------set_zone_data-----
         service = service_base_name + "set_zone_data"
         srv = rospy.ServiceProxy(service, SetZoneData)
         success = False
@@ -135,6 +137,7 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
+        #------set_speed-----
         service = service_base_name + "set_speed"
         srv = rospy.ServiceProxy(service, SetSpeed)
         success = False
@@ -146,6 +149,7 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
+        #------move_l-----
         service = service_base_name + "move_l"
         srv = rospy.ServiceProxy(service, MoveL)
         success = False
@@ -159,6 +163,7 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
+        #------run_message-----
         service = service_base_name + "run_message"
         srv = rospy.ServiceProxy(service, RunMessage)
         success = False
@@ -170,6 +175,7 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
+        #------pause-----
         service = service_base_name + "pause"
         srv = rospy.ServiceProxy(service, Pause)
         success = False
@@ -181,6 +187,7 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
+        #------set_do-----
         service = service_base_name + "set_do"
         srv = rospy.ServiceProxy(service, SetDO)
         success = False
@@ -192,6 +199,7 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
+        #------wait_di-----
         service = service_base_name + "wait_di"
         srv = rospy.ServiceProxy(service, WaitDI)
         success = False
@@ -203,6 +211,7 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
+        #------run_code-----
         service = service_base_name + "run_code"
         srv = rospy.ServiceProxy(service, RunCode)
         success = False
@@ -214,44 +223,24 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
-        service = service_base_name + "motoman/macro"
-        srv = rospy.ServiceProxy(service, Macro)
-        success = False
-        try:
-            resp = srv(1, 3, [1, 2])
-            success = True
-        except rospy.ServiceException as exc:
-            rospy.logerr("Service did not process request: " + str(exc))
-        self.assertEquals(success, True, "Failed to call service %s" % srv)
-        self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
-
-        service = service_base_name + "motoman/arcon"
-        srv = rospy.ServiceProxy(service, Arcon)
-        success = False
-        try:
-            resp = srv(1)
-            success = True
-        except rospy.ServiceException as exc:
-            rospy.logerr("Service did not process request: " + str(exc))
-        self.assertEquals(success, True, "Failed to call service %s" % srv)
-        self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
-
-        service = service_base_name + "motoman/arcof"
-        srv = rospy.ServiceProxy(service, Arcof)
-        success = False
-        try:
-            resp = srv(2)
-            success = True
-        except rospy.ServiceException as exc:
-            rospy.logerr("Service did not process request: " + str(exc))
-        self.assertEquals(success, True, "Failed to call service %s" % srv)
-        self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
-
+        #------prog_finish-----
         service = service_base_name + "prog_finish"
         srv = rospy.ServiceProxy(service, ProgFinish)
         success = False
         try:
             resp = srv("test")
+            success = True
+        except rospy.ServiceException as exc:
+            rospy.logerr("Service did not process request: " + str(exc))
+        self.assertEquals(success, True, "Failed to call service %s" % srv)
+        self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
+
+        #------prog_finish-----
+        service = service_base_name + "prog_save"
+        srv = rospy.ServiceProxy(service, ProgSave)
+        success = False
+        try:
+            resp = srv("test", "/home/controls/catkin_ws/src/ros_robodk_post_processors")
             success = True
         except rospy.ServiceException as exc:
             rospy.logerr("Service did not process request: " + str(exc))
