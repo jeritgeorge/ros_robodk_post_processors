@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="ros_robodk_post_processors" name="services" type="services.py" />
+  <node pkg="ros_robodk_post_processors" type="ros_to_ls.py" name="ros_to_ls"/>
+</launch>

@@ -25,7 +25,7 @@ class ServicesTests(unittest.TestCase):
             service = service_base_name + name
             self.assertEquals(checkService(service), True, "Service %s is not available!" % service)
 
-    def testMotomanProgram(self):
+    def testFanucProgram(self):
         rospy.wait_for_service(service_base_name + "prog_start")
         rospy.wait_for_service(service_base_name + "set_tool")
         rospy.wait_for_service(service_base_name + "set_frame")
@@ -73,7 +73,7 @@ class ServicesTests(unittest.TestCase):
         srv = rospy.ServiceProxy(service, SetFrame)
         success = False
         try:
-            resp = srv(0, "frame", geometry_msgs.msg.Pose(geometry_msgs.msg.Point(0, 0, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)))
+            resp = srv(1, "frame", geometry_msgs.msg.Pose(geometry_msgs.msg.Point(0, 0, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)))
             success = True
         except rospy.ServiceException as exc:
             rospy.logerr("Service did not process request: " + str(exc))
@@ -82,29 +82,28 @@ class ServicesTests(unittest.TestCase):
 
 
         #------move_c-----
-        service = service_base_name + "move_c"
-        srv = rospy.ServiceProxy(service, MoveC)
-        success = False
-        try:
-            resp = srv(geometry_msgs.msg.Pose(geometry_msgs.msg.Point(1, 0, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)),
-                       [0, 0, 0, 0, 0, 0],
-                       [0, 0, 0],
-                       geometry_msgs.msg.Pose(geometry_msgs.msg.Point(1.5, 0, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)),
-                       [0, 0, 0, 0, 0, 0],
-                       [0, 0, 0])
-            success = True
-        except rospy.ServiceException as exc:
-            rospy.logerr("Service did not process request: " + str(exc))
-        self.assertEquals(success, True, "Failed to call service %s" % srv)
-        self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
-
+        # service = service_base_name + "move_c"
+        # srv = rospy.ServiceProxy(service, MoveC)
+        # success = False
+        # try:
+        #     resp = srv(geometry_msgs.msg.Pose(geometry_msgs.msg.Point(1, 0, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)),
+        #                [0, 0, 0, 0, 0, 0],
+        #                [0, 0, 0],
+        #                geometry_msgs.msg.Pose(geometry_msgs.msg.Point(1.5, 0, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)),
+        #                [0, 0, 0, 0, 0, 0],
+        #                [0, 0, 0])
+        #     success = True
+        # except rospy.ServiceException as exc:
+        #     rospy.logerr("Service did not process request: " + str(exc))
+        # self.assertEquals(success, True, "Failed to call service %s" % srv)
+        # self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
         #------set_speed_joints-----
         service = service_base_name + "set_speed_joints"
         srv = rospy.ServiceProxy(service, SetSpeedJoints)
         success = False
         try:
-            resp = srv(10.0)
+            resp = srv(20.0) #takes in degrees/sec, inserts % speed for joint moves
             success = True
         except rospy.ServiceException as exc:
             rospy.logerr("Service did not process request: " + str(exc))
@@ -117,7 +116,7 @@ class ServicesTests(unittest.TestCase):
         success = False
         try:
             resp = srv(geometry_msgs.msg.Pose(geometry_msgs.msg.Point(1, 0, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)),
-                       [0, 0, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 0, 0, 0, 0],
                        [0, 0, 0])
             success = True
         except rospy.ServiceException as exc:
@@ -150,18 +149,18 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
         #------move_l-----
-        service = service_base_name + "move_l"
-        srv = rospy.ServiceProxy(service, MoveL)
-        success = False
-        try:
-            resp = srv(geometry_msgs.msg.Pose(geometry_msgs.msg.Point(1, 0.5, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)),
-                       [0, 0, 0, 0, 0, 0],
-                       [0, 0, 0])
-            success = True
-        except rospy.ServiceException as exc:
-            rospy.logerr("Service did not process request: " + str(exc))
-        self.assertEquals(success, True, "Failed to call service %s" % srv)
-        self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
+        # service = service_base_name + "move_l"
+        # srv = rospy.ServiceProxy(service, MoveL)
+        # success = False
+        # try:
+        #     resp = srv(geometry_msgs.msg.Pose(geometry_msgs.msg.Point(1, 0.5, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)),
+        #                [0, 0, 0, 0, 0, 0],
+        #                [0, 0, 0])
+        #     success = True
+        # except rospy.ServiceException as exc:
+        #     rospy.logerr("Service did not process request: " + str(exc))
+        # self.assertEquals(success, True, "Failed to call service %s" % srv)
+        # self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
         #------run_message-----
         service = service_base_name + "run_message"
