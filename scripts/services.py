@@ -70,9 +70,10 @@ def move_l(req):
         return ["conf_RLF size must be 3"]
 
     if not poseInitialized(req.pose):
-        return ["Pose quaternions are not initialized"]
-
-    p = poseToMat(req.pose)
+        #return ["Pose quaternions are not initialized"]
+        p = None
+    else:
+        p = poseToMat(req.pose)
     config.pp.MoveL(p, req.joints, list(req.conf_RLF))
     return [""]
 

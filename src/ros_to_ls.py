@@ -79,27 +79,87 @@ def turnToolOff(Tool):
         rospy.logerr("Service did not process request: " + str(exc))
 
 def callback(data):
+    programNameList = []
     try:
         if data.from_home is not None:
-            createLSfromRobotProcessPath(data.from_home, "fromHome")
+            programNameList.append("fromHome")
+            createLSfromRobotProcessPath(data.from_home, programNameList[-1])
     except rospy.ServiceException as exc:
         rospy.logerr("error: " + str(exc))
 
     try:
         i = 0
         for segment in data.segments:
-            createLSfromRobotProcessPath(segment.approach, "approach" + str(i))
-            createLSfromRobotProcessPath(segment.process, "process" + str(i))
-            createLSfromRobotProcessPath(segment.departure, "departure" + str(i))
+            
+            if segment is not None and not (segment == ProcessSegment()):
+                rospy.loginfo("%s" % segment)
+                if segment.approach is not None and not (segment.approach == RobotProcessPath()):
+                    programNameList.append("approach" + str(i))
+                    createLSfromRobotProcessPath(segment.approach, programNameList[-1])
+                if segment.process is not None and not (segment.process == RobotProcessPath()):
+                    programNameList.append("process" + str(i))
+                    createLSfromRobotProcessPath(segment.process, programNameList[-1])
+                if segment.departure is not None and not (segment.departure == RobotProcessPath()):
+                    programNameList.append("departure" + str(i))
+                    createLSfromRobotProcessPath(segment.departure, programNameList[-1])
             i = i + 1
     except rospy.ServiceException as exc:
         rospy.logerr("error: " + str(exc))     
 
     try:
         if data.to_home is not None:
-            createLSfromRobotProcessPath(data.to_home, "toHome")
+            programNameList.append("toHome")
+            createLSfromRobotProcessPath(data.to_home, programNameList[-1])
     except rospy.ServiceException as exc:
         rospy.logerr("error: " + str(exc))   
+
+    createMasterLS("pns0010", programNameList)
+
+def createMasterLS(prgname, programList):
+    #-----prog_start-----
+    service = service_base_name + "prog_start"
+    srv = rospy.ServiceProxy(service, ProgStart)
+    success = False
+    try:
+        resp = srv("Fanuc_R30iA", prgname, "Master ROS Program")
+        success = True
+    except rospy.ServiceException as exc:
+        rospy.logerr("Service did not process request: " + str(exc))
+
+    #for each point in the trajectory
+    for indx, programName in enumerate(programList):
+        #------run_code-----
+        service = service_base_name + "run_code"
+        srv = rospy.ServiceProxy(service, RunCode)
+        success = False
+        try:
+            resp = srv(programName, True)
+            success = True
+        except rospy.ServiceException as exc:
+            rospy.logerr("Service did not process request: " + str(exc))
+
+        
+
+    #------prog_finish-----
+    service = service_base_name + "prog_finish"
+    srv = rospy.ServiceProxy(service, ProgFinish)
+    success = False
+    try:
+        resp = srv(prgname)
+        success = True
+    except rospy.ServiceException as exc:
+        rospy.logerr("Service did not process request: " + str(exc))
+    
+
+    #------prog_save-----
+    service = service_base_name + "prog_save"
+    srv = rospy.ServiceProxy(service, ProgSave)
+    success = False
+    try:
+        resp = srv(prgname, "/home/controls/catkin_ws/src/ros_robodk_post_processors")
+        success = True
+    except rospy.ServiceException as exc:
+        rospy.logerr("Service did not process request: " + str(exc))
 
 def createLSfromRobotProcessPath(data, prgname): 
 
@@ -113,65 +173,54 @@ def createLSfromRobotProcessPath(data, prgname):
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
 
-    #-----set_go-----
-    service = service_base_name + "set_go"
-    srv = rospy.ServiceProxy(service, SetGO)
-    success = False
-    try:
-        resp = srv('12', '1')
-        success = True
-    except rospy.ServiceException as exc:
-        rospy.logerr("Service did not process request: " + str(exc))
-
-    #------set_tool-----
-    service = service_base_name + "set_tool"
-    srv = rospy.ServiceProxy(service, SetTool)
-    success = False
-    try:
-        resp = srv(0, "tool", geometry_msgs.msg.Pose(geometry_msgs.msg.Point(0, 0, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)))
-        success = True
-    except rospy.ServiceException as exc:
-        rospy.logerr("Service did not process request: " + str(exc))
-
-    
-    #------set_frame-----
-    service = service_base_name + "set_frame"
-    srv = rospy.ServiceProxy(service, SetFrame)
-    success = False
-    try:
-        resp = srv(1, "frame", geometry_msgs.msg.Pose(geometry_msgs.msg.Point(0, 0, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)))
-        success = True
-    except rospy.ServiceException as exc:
-        rospy.logerr("Service did not process request: " + str(exc))
-
-    turnToolOn(1)
-    
     #for each point in the trajectory
-    for point in data.trajectory.points:
-        #------set_speed_joints-----
-        service = service_base_name + "set_speed_joints"
-        srv = rospy.ServiceProxy(service, SetSpeedJoints)
-        success = False
-        try:
-            resp = srv(point.velocities[0]) #takes in degrees/sec, inserts % speed for joint moves
-            success = True
-        except rospy.ServiceException as exc:
-            rospy.logerr("Service did not process request: " + str(exc))
-            
+    for indx, point in enumerate(data.trajectory.points):
+        if data.type.val == ProcessType.NONE:
+            #------set_speed_joints-----
+            service = service_base_name + "set_speed_joints"
+            srv = rospy.ServiceProxy(service, SetSpeedJoints)
+            success = False
+            try:
+                resp = srv(point.velocities[0]) #takes in degrees/sec, inserts % speed for joint moves
+                success = True
+            except rospy.ServiceException as exc:
+                rospy.logerr("Service did not process request: " + str(exc))
+                
 
-        #------move_j-----
-        service = service_base_name + "move_j"
-        srv = rospy.ServiceProxy(service, MoveJ)
-        success = False
-        try:
-            resp = srv(geometry_msgs.msg.Pose(geometry_msgs.msg.Point(1, 0, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)),
-                        [point.positions[0], point.positions[1], point.positions[2], point.positions[3], point.positions[4], point.positions[5], point.positions[6], point.positions[7]],
-                        [0, 0, 0])
-            success = True
-        except rospy.ServiceException as exc:
-            rospy.logerr("Service did not process request: " + str(exc))
+            #------move_j-----
+            service = service_base_name + "move_j"
+            srv = rospy.ServiceProxy(service, MoveJ)
+            success = False
+            try:
+                resp = srv(geometry_msgs.msg.Pose(geometry_msgs.msg.Point(1, 0, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)),
+                            [point.positions[0], point.positions[1], point.positions[2], point.positions[3], point.positions[4], point.positions[5], point.positions[6], point.positions[7]],
+                            [0, 0, 0])
+                success = True
+            except rospy.ServiceException as exc:
+                rospy.logerr("Service did not process request: " + str(exc))
+        else:
+            #------set_speed-----
+            service = service_base_name + "set_speed"
+            srv = rospy.ServiceProxy(service, SetSpeed)
+            success = False
+            try:
+                resp = srv(data.velocity[indx])
+                success = True
+            except rospy.ServiceException as exc:
+                rospy.logerr("Service did not process request: " + str(exc))
+
+            #------move_l-----
+            service = service_base_name + "move_l"
+            srv = rospy.ServiceProxy(service, MoveL)
+            success = False
+            try:
+                resp = srv(None,
+                            [point.positions[0], point.positions[1], point.positions[2], point.positions[3], point.positions[4], point.positions[5], point.positions[6], point.positions[7]],
+                            [0, 0, 0])
+                success = True
+            except rospy.ServiceException as exc:
+                rospy.logerr("Service did not process request: " + str(exc))
         
-    turnToolOff(1)
 
     #------prog_finish-----
     service = service_base_name + "prog_finish"

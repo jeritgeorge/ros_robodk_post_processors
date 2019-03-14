@@ -23,10 +23,10 @@ def talker():
         examplePath = RobotProcessPath()
         examplePathProcess = RobotProcessPath()
         processType = ProcessType()
-        processType.val = processType.CHEMICAL_DEPAINT_AGITATE
+        processType.val = ProcessType.CHEMICAL_DEPAINT_AGITATE
 
         processTypeMove = ProcessType()
-        processTypeMove.val = processType.NONE
+        processTypeMove.val = ProcessType.NONE
 
         
         trajectory = JointTrajectory()
@@ -88,6 +88,12 @@ def talker():
         exampleSegment.approach = examplePathProcess
         exampleSegment.process = examplePathProcess
         exampleSegment.departure = examplePathProcess
+        segments.append(exampleSegment)
+
+        exampleSegment = ProcessSegment()
+        #exampleSegment.approach = examplePathProcess
+        exampleSegment.process = examplePathProcess
+        #exampleSegment.departure = examplePathProcess
         segments.append(exampleSegment)
         #initialize transitions
         exampleTransition = TransitionPair()

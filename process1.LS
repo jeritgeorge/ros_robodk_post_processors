@@ -1,4 +1,4 @@
-/PROG  toHome
+/PROG  process1
 /ATTR
 OWNER		= MNEDITOR;
 COMMENT		= "test_comment";
@@ -19,8 +19,8 @@ TCD:  STACK_SIZE	= 0,
 DEFAULT_GROUP	= 1,*,*,*,*,*,*;
 CONTROL_CODE	= 00000000 00000000;
 /MN
-   1:J P[1] 10% FINE ;
-   2:J P[2] 8% FINE ;
+   1:L P[1] 100mm/sec FINE ;
+   2:L P[2] 101mm/sec FINE ;
 /POS
 P[1]{
    GP1:

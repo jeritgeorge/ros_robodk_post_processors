@@ -163,6 +163,20 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
+        #------move_l-----joint position
+        service = service_base_name + "move_l"
+        srv = rospy.ServiceProxy(service, MoveL)
+        success = False
+        try:
+            resp = srv(None,
+                       [0, 0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0])
+            success = True
+        except rospy.ServiceException as exc:
+            rospy.logerr("Service did not process request: " + str(exc))
+        self.assertEquals(success, True, "Failed to call service %s" % srv)
+        self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
+
         #------run_message-----
         service = service_base_name + "run_message"
         srv = rospy.ServiceProxy(service, RunMessage)
