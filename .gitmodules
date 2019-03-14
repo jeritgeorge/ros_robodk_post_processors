@@ -1,3 +1,0 @@
-[submodule "scripts/robodk_postprocessors"]
-	path = scripts/robodk_postprocessors
-	url = https://github.com/InstitutMaupertuis/robodk_postprocessors.git
