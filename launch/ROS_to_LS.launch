@@ -2,4 +2,5 @@
 <launch>
   <node pkg="ros_robodk_post_processors" name="services" type="services.py" />
   <node pkg="ros_robodk_post_processors" type="ros_to_ls.py" name="ros_to_ls"/>
+  <node pkg="ros_robodk_post_processors" type="DummyPathPlanner.py" name="DummyPathPlanner"/>
 </launch>

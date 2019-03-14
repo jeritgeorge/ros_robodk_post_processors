@@ -182,6 +182,18 @@ def set_do(req): # set Digital Output
 
     return [""]
 
+def set_go(req): # set Group Output
+    if config.pp is None:
+        return [config.pp_not_init]
+
+    try:
+        var = int(req.io_var)
+        config.pp.setGO(var, req.io_value)
+    except ValueError:
+        config.pp.setGO(req.io_var, req.io_value)
+
+    return [""]
+
 def set_frame(req):
     if config.pp is None:
         return [config.pp_not_init]
@@ -253,6 +265,7 @@ def services_servers():
     services.append(rospy.Service(service_prefix + 'run_code', RunCode, run_code))
     services.append(rospy.Service(service_prefix + 'run_message', RunMessage, run_message))
     services.append(rospy.Service(service_prefix + 'set_do', SetDO, set_do))
+    services.append(rospy.Service(service_prefix + 'set_go', SetGO, set_go))
     services.append(rospy.Service(service_prefix + 'set_frame', SetFrame, set_frame))
     services.append(rospy.Service(service_prefix + 'set_speed', SetSpeed, set_speed))
     services.append(rospy.Service(service_prefix + 'set_speed_joints', SetSpeedJoints, set_speed_joints))

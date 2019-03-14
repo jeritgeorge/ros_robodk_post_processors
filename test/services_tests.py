@@ -19,7 +19,7 @@ def checkService(service_name):
 class ServicesTests(unittest.TestCase):
 
     def testWaitForServices(self):
-        services = ["move_c", "move_j", "move_l", "pause", "prog_finish", "prog_save", "prog_send_robot", "prog_start", "run_code", "run_message", "set_do", "set_frame", "set_speed", "set_speed_joints", "set_tool", "set_zone_data", "wait_di"]
+        services = ["move_c", "move_j", "move_l", "pause", "prog_finish", "prog_save", "prog_send_robot", "prog_start", "run_code", "run_message", "set_do", "set_go", "set_frame", "set_speed", "set_speed_joints", "set_tool", "set_zone_data", "wait_di"]
 
         for name in services:
             service = service_base_name + name
@@ -38,6 +38,7 @@ class ServicesTests(unittest.TestCase):
         rospy.wait_for_service(service_base_name + "run_message")
         rospy.wait_for_service(service_base_name + "pause")
         rospy.wait_for_service(service_base_name + "set_do")
+        rospy.wait_for_service(service_base_name + "set_go")
         rospy.wait_for_service(service_base_name + "run_message")
         rospy.wait_for_service(service_base_name + "wait_di")
         rospy.wait_for_service(service_base_name + "run_code")
@@ -198,6 +199,18 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
+        #------set_go-----
+        service = service_base_name + "set_go"
+        srv = rospy.ServiceProxy(service, SetGO)
+        success = False
+        try:
+            resp = srv('12', '1')
+            success = True
+        except rospy.ServiceException as exc:
+            rospy.logerr("Service did not process request: " + str(exc))
+        self.assertEquals(success, True, "Failed to call service %s" % srv)
+        self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
+
         #------wait_di-----
         service = service_base_name + "wait_di"
         srv = rospy.ServiceProxy(service, WaitDI)
@@ -234,7 +247,7 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(success, True, "Failed to call service %s" % srv)
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
-        #------prog_finish-----
+        #------prog_save-----
         service = service_base_name + "prog_save"
         srv = rospy.ServiceProxy(service, ProgSave)
         success = False

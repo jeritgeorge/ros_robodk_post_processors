@@ -32,6 +32,7 @@ add_service_files(
   RunCode.srv
   RunMessage.srv
   SetDO.srv
+  SetGO.srv
   SetFrame.srv
   SetSpeed.srv
   SetSpeedJoints.srv
