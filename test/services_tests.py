@@ -150,18 +150,18 @@ class ServicesTests(unittest.TestCase):
         self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
         #------move_l-----
-        # service = service_base_name + "move_l"
-        # srv = rospy.ServiceProxy(service, MoveL)
-        # success = False
-        # try:
-        #     resp = srv(geometry_msgs.msg.Pose(geometry_msgs.msg.Point(1, 0.5, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)),
-        #                [0, 0, 0, 0, 0, 0],
-        #                [0, 0, 0])
-        #     success = True
-        # except rospy.ServiceException as exc:
-        #     rospy.logerr("Service did not process request: " + str(exc))
-        # self.assertEquals(success, True, "Failed to call service %s" % srv)
-        # self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
+        service = service_base_name + "move_l"
+        srv = rospy.ServiceProxy(service, MoveL)
+        success = False
+        try:
+            resp = srv(geometry_msgs.msg.Pose(geometry_msgs.msg.Point(1, 0.5, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)),
+                       [0, 0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0])
+            success = True
+        except rospy.ServiceException as exc:
+            rospy.logerr("Service did not process request: " + str(exc))
+        self.assertEquals(success, True, "Failed to call service %s" % srv)
+        self.assertEquals(len(resp.error), 0, "Service %s failed with an error: %s" % (srv, resp.error))
 
         #------run_message-----
         service = service_base_name + "run_message"

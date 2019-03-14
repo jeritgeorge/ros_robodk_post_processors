@@ -12,11 +12,13 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   rostest
   std_msgs
+  rpgatta_msgs
 )
 
 ################################################
 ## Declare ROS messages, services and actions ##
 ################################################
+
 
 # Common services to all post-processors
 add_service_files(
@@ -55,6 +57,7 @@ generate_messages(
   DEPENDENCIES
   geometry_msgs
   std_msgs
+  rpgatta_msgs
 )
 
 ################################################
@@ -72,6 +75,7 @@ catkin_package(
   rospy
   rostest
   std_msgs
+  rpgatta_msgs
 )
 
 #############

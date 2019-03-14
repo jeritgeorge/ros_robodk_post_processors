@@ -5,6 +5,11 @@ service_base_name = "/robodk_post_processors/"
 from ros_robodk_post_processors.srv import *
 import geometry_msgs.msg
 import trajectory_msgs.msg
+from rpgatta_msgs.msg import MotionPlan
+from rpgatta_msgs.msg import ProcessSegment
+from rpgatta_msgs.msg import TransitionPair
+from rpgatta_msgs.msg import RobotProcessPath
+from rpgatta_msgs.msg import ProcessType
 import rospy
 import unittest 
 
@@ -74,17 +79,41 @@ def turnToolOff(Tool):
         rospy.logerr("Service did not process request: " + str(exc))
 
 def callback(data):
-    rospy.loginfo(rospy.get_caller_id() + ": I heard %s = %f", data.joint_names[0], data.points[0].positions[0]) 
+    try:
+        if data.from_home is not None:
+            createLSfromRobotProcessPath(data.from_home, "fromHome")
+    except rospy.ServiceException as exc:
+        rospy.logerr("error: " + str(exc))
 
+    try:
+        i = 0
+        for segment in data.segments:
+            createLSfromRobotProcessPath(segment.approach, "approach" + str(i))
+            createLSfromRobotProcessPath(segment.process, "process" + str(i))
+            createLSfromRobotProcessPath(segment.departure, "departure" + str(i))
+            i = i + 1
+    except rospy.ServiceException as exc:
+        rospy.logerr("error: " + str(exc))     
+
+    try:
+        if data.to_home is not None:
+            createLSfromRobotProcessPath(data.to_home, "toHome")
+    except rospy.ServiceException as exc:
+        rospy.logerr("error: " + str(exc))   
+
+def createLSfromRobotProcessPath(data, prgname): 
+
+    #-----prog_start-----
     service = service_base_name + "prog_start"
     srv = rospy.ServiceProxy(service, ProgStart)
     success = False
     try:
-        resp = srv("Fanuc_R30iA", "test", "")
+        resp = srv("Fanuc_R30iA", prgname, "test_comment")
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
 
+    #-----set_go-----
     service = service_base_name + "set_go"
     srv = rospy.ServiceProxy(service, SetGO)
     success = False
@@ -118,7 +147,7 @@ def callback(data):
     turnToolOn(1)
     
     #for each point in the trajectory
-    for point in data.points:
+    for point in data.trajectory.points:
         #------set_speed_joints-----
         service = service_base_name + "set_speed_joints"
         srv = rospy.ServiceProxy(service, SetSpeedJoints)
@@ -149,7 +178,7 @@ def callback(data):
     srv = rospy.ServiceProxy(service, ProgFinish)
     success = False
     try:
-        resp = srv("test")
+        resp = srv(prgname)
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
@@ -160,7 +189,7 @@ def callback(data):
     srv = rospy.ServiceProxy(service, ProgSave)
     success = False
     try:
-        resp = srv("test", "/home/controls/catkin_ws/src/ros_robodk_post_processors")
+        resp = srv(prgname, "/home/controls/catkin_ws/src/ros_robodk_post_processors")
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
@@ -190,7 +219,7 @@ def listener():
     rospy.wait_for_service(service_base_name + "run_code")
     rospy.wait_for_service(service_base_name + "prog_finish")
     rospy.wait_for_service(service_base_name + "prog_save")
-    rospy.Subscriber("chatter", trajectory_msgs.msg.JointTrajectory, callback)
+    rospy.Subscriber("chatter", MotionPlan, callback)
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()

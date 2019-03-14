@@ -17,4 +17,5 @@
   <depend>message_runtime</depend>
   <depend>python-tk</depend>
   <depend>std_msgs</depend>
+  <depend>rpgatta_msgs</depend>
 </package>

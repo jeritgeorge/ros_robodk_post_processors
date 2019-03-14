@@ -94,6 +94,8 @@ class RobotPost(object):
     PROG_NAME = 'unknown'  # Original name of the current program (example: ProgA)
     PROG_NAME_CURRENT = 'unknown' # Auto generated name (different from PROG_NAME if we have more than 1 page per program. Example: ProgA2)
     
+    PROG_COMMENT = 'unknown' #original comment for the current program
+
     nPages = 0           # Count the number of pages
     PROG_NAMES_MAIN = [] # List of programs called by a main program due to splitting
     
@@ -138,7 +140,7 @@ class RobotPost(object):
                 self.AXES_TURNTABLE.append(i)
                 self.HAS_TURNTABLE = True        
                 
-    def ProgStart(self, progname, new_page = False):
+    def ProgStart(self, progname, comment = 'RoboDK sequence', new_page = False):
         progname = get_safe_name(progname)
         progname_i = progname
         if new_page:
@@ -164,6 +166,7 @@ class RobotPost(object):
             
         self.PROG_NAME_CURRENT = progname_i
         self.PROG_NAMES.append(progname_i)
+        self.PROG_COMMENT = comment
         
     def ProgFinish(self, progname, new_page = False):
         progname = get_safe_name(progname)
@@ -178,7 +181,7 @@ class RobotPost(object):
         header = header + ('/PROG  %s' % self.PROG_NAME_CURRENT) + '\n' # Use the latest name set at ProgStart
         header = header + '/ATTR' + '\n'
         header = header + 'OWNER\t\t= MNEDITOR;' + '\n'
-        header = header + 'COMMENT\t\t= "RoboDK sequence";' + '\n'
+        header = header + ('COMMENT\t\t= "%s";' % self.PROG_COMMENT) + '\n'
         header = header + 'PROG_SIZE\t= 0;' + '\n'
         header = header + 'CREATE\t\t= DATE 31-12-14  TIME 12:00:00;' + '\n'
         header = header + 'MODIFIED\t= DATE 31-12-14  TIME 12:00:00;' + '\n'
