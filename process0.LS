@@ -7,7 +7,7 @@ CREATE		= DATE 31-12-14  TIME 12:00:00;
 MODIFIED	= DATE 31-12-14  TIME 12:00:00;
 FILE_NAME	= ;
 VERSION		= 0;
-LINE_COUNT	= 2;
+LINE_COUNT	= 8;
 MEMORY_SIZE	= 0;
 PROTECT		= READ_WRITE;
 TCD:  STACK_SIZE	= 0,
@@ -19,21 +19,27 @@ TCD:  STACK_SIZE	= 0,
 DEFAULT_GROUP	= 1,*,*,*,*,*,*;
 CONTROL_CODE	= 00000000 00000000;
 /MN
-   1:L P[1] 100mm/sec FINE ;
-   2:L P[2] 101mm/sec FINE ;
+   1:  UTOOL_NUM=1 ;
+   2:  ! UT1:0.0,0.0,0.0,0.0, ;
+   3:  ! -0.0,0.0 ;
+   4:  UFRAME_NUM=0 ;
+   5:  ! UF0:0.0,0.0,0.0,0.0, ;
+   6:  ! -0.0,0.0 ;
+   7:L P[1] 100mm/sec FINE ;
+   8:L P[2] 101mm/sec FINE ;
 /POS
 P[1]{
    GP1:
-    UF : 9, UT : 9,    
-	J1=    0.000 deg,	J2=    0.000 deg,	J3=    0.300 deg,
-	J4=    0.600 deg,	J5=    0.500 deg,	J6=    10.000 deg,
-	E1=  1000.000  mm,	E2=  1000.000  mm
+    UF : 0, UT : 1,    
+	J1=    -90.000 deg,	J2=    -65.000 deg,	J3=    0.000 deg,
+	J4=    -180.000 deg,	J5=    -60.000 deg,	J6=    10.000 deg,
+	E1= -1000.000  mm,	E2= -1000.000  mm
 };
 P[2]{
    GP1:
-    UF : 9, UT : 9,    
-	J1=    0.000 deg,	J2=    0.000 deg,	J3=    0.000 deg,
-	J4=    0.000 deg,	J5=    0.000 deg,	J6=    0.000 deg,
-	E1=  1000.000  mm,	E2=  1000.000  mm
+    UF : 0, UT : 1,    
+	J1=    -90.000 deg,	J2=    -65.000 deg,	J3=    0.000 deg,
+	J4=    180.000 deg,	J5=    -60.000 deg,	J6=    0.000 deg,
+	E1= -1500.000  mm,	E2= -1500.000  mm
 };
 /END

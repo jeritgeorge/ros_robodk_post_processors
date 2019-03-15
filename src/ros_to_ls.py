@@ -13,8 +13,11 @@ from rpgatta_msgs.msg import ProcessType
 import rospy
 import unittest 
 
+previousTool = 0
+previousToolSetting = 0
 
-def turnToolOn(Tool):
+
+def turnToolOn():
     #------set_do-----
     service = service_base_name + "set_do"
     srv = rospy.ServiceProxy(service, SetDO)
@@ -46,7 +49,7 @@ def turnToolOn(Tool):
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
 
-def turnToolOff(Tool):
+def turnToolOff():
     #------set_do-----
     service = service_base_name + "set_do"
     srv = rospy.ServiceProxy(service, SetDO)
@@ -173,9 +176,34 @@ def createLSfromRobotProcessPath(data, prgname):
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
 
-    #for each point in the trajectory
-    for indx, point in enumerate(data.trajectory.points):
-        if data.type.val == ProcessType.NONE:
+    #------set_tool-----
+    service = service_base_name + "set_tool"
+    srv = rospy.ServiceProxy(service, SetTool)
+    success = False
+    try:
+        resp = srv(1, "tool", geometry_msgs.msg.Pose(geometry_msgs.msg.Point(0, 0, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)))
+        success = True
+    except rospy.ServiceException as exc:
+        rospy.logerr("Service did not process request: " + str(exc))
+
+    #------set_frame-----
+    service = service_base_name + "set_frame"
+    srv = rospy.ServiceProxy(service, SetFrame)
+    success = False
+    try:
+        resp = srv(0, "frame", geometry_msgs.msg.Pose(geometry_msgs.msg.Point(0, 0, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)))
+        success = True
+    except rospy.ServiceException as exc:
+        rospy.logerr("Service did not process request: " + str(exc))
+
+
+    
+    if data.type.val == ProcessType.NONE:
+        if previousTool is not ProcessType.NONE:
+            turnToolOff(previousTool)
+            previousTool = ProcessType.NONE
+        #for each point in the trajectory
+        for indx, point in enumerate(data.trajectory.points):    
             #------set_speed_joints-----
             service = service_base_name + "set_speed_joints"
             srv = rospy.ServiceProxy(service, SetSpeedJoints)
@@ -198,7 +226,9 @@ def createLSfromRobotProcessPath(data, prgname):
                 success = True
             except rospy.ServiceException as exc:
                 rospy.logerr("Service did not process request: " + str(exc))
-        else:
+    else:
+        #for each point in the trajectory
+        for indx, point in enumerate(data.trajectory.points):
             #------set_speed-----
             service = service_base_name + "set_speed"
             srv = rospy.ServiceProxy(service, SetSpeed)
