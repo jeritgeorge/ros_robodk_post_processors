@@ -16,6 +16,21 @@ import unittest
 previousTool = 0
 previousToolSetting = 0
 
+processToTool = {
+		ProcessType.NONE : 0,
+		ProcessType.CHEMICAL_DEPAINT_AGITATE : 1,
+		ProcessType.CHEMICAL_DEPAINT_STRIP : 11,
+		ProcessType.CHEMICAL_DEPAINT_WASH : 3,
+		ProcessType.GRIT_BLAST_STRIP : 1,
+		ProcessType.SAND_STRIP : 1
+	}
+AGITATORRPM_MIN = 5
+AGITATORRPM_MAX = 20
+HPRPM_MIN = 1000
+HPRPM_MAX = 2500
+HPPRESSURE_MIN = 3000
+HPPRESSURE_MAX = 15000
+
 
 def turnToolOn():
     #------set_do-----
@@ -80,6 +95,53 @@ def turnToolOff():
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
+
+def setTool(Tool):
+    #------set_go-----
+        service = service_base_name + "set_go"
+        srv = rospy.ServiceProxy(service, SetGO)
+        success = False
+        try:
+            resp = srv('12', Tool) #GO[12] is tool selection
+            success = True
+        except rospy.ServiceException as exc:
+            rospy.logerr("Service did not process request: " + str(exc))
+
+def setAgitatorRPM(work):
+    #------set_go-----
+    rpm = ((AGITATORRPM_MAX-AGITATORRPM_MIN) * work) + AGITATORRPM_MIN 
+    service = service_base_name + "set_go"
+    srv = rospy.ServiceProxy(service, SetGO)
+    success = False
+    try:
+        resp = srv('5', rpm) #GO[12] is tool selection
+        success = True
+    except rospy.ServiceException as exc:
+        rospy.logerr("Service did not process request: " + str(exc))            
+
+def setHighPressureWaterRPM(work):
+    #------set_go-----
+    rpm = ((HPRPM_MAX-HPRPM_MIN) * work) + HPRPM_MIN 
+    service = service_base_name + "set_go"
+    srv = rospy.ServiceProxy(service, SetGO)
+    success = False
+    try:
+        resp = srv('6', rpm) #GO[12] is tool selection
+        success = True
+    except rospy.ServiceException as exc:
+        rospy.logerr("Service did not process request: " + str(exc))  
+
+def setHighPressureWaterPressure(work):
+    #------set_go-----
+    p = ((HPPRESSURE_MAX-HPPRESSURE_MIN) * work) + HPPRESSURE_MIN 
+    service = service_base_name + "set_go"
+    srv = rospy.ServiceProxy(service, SetGO)
+    success = False
+    try:
+        resp = srv('7', p) #GO[12] is tool selection
+        success = True
+    except rospy.ServiceException as exc:
+        rospy.logerr("Service did not process request: " + str(exc))  
 
 def callback(data):
     programNameList = []
@@ -199,9 +261,10 @@ def createLSfromRobotProcessPath(data, prgname):
 
     
     if data.type.val == ProcessType.NONE:
-        if previousTool is not ProcessType.NONE:
+        if previousTool is not processToTool[ProcessType.NONE]:
+            setTool(processToTool[ProcessType.NONE])
             turnToolOff(previousTool)
-            previousTool = ProcessType.NONE
+            previousTool = processToTool[ProcessType.NONE]
         #for each point in the trajectory
         for indx, point in enumerate(data.trajectory.points):    
             #------set_speed_joints-----
@@ -227,8 +290,25 @@ def createLSfromRobotProcessPath(data, prgname):
             except rospy.ServiceException as exc:
                 rospy.logerr("Service did not process request: " + str(exc))
     else:
+        if previousTool is not processToTool[data.type.val]:
+            setTool(processToTool[data.type.val])
+            previousTool = processToTool[data.type.val]
+        
         #for each point in the trajectory
         for indx, point in enumerate(data.trajectory.points):
+            #------set_tool rpm/pressure
+            if previousToolSetting is not data.tool_work[indx]:
+                #if agitator set brush rpm
+                if previousTool == processToTool[ProcessType.CHEMICAL_DEPAINT_AGITATE]:
+                    setAgitatorRPM(data.tool_work[indx])
+                #if high pressure water set rpm/pressure TODO
+                
+                if previousToolSetting == 0: #tool was off, so must turn on
+                    turnToolOn()
+                else if data.tool_work[indx] == 0: #tool was on, so must turn off
+                    turnToolOff()
+                previousToolSetting = data.tool_work[indx]
+
             #------set_speed-----
             service = service_base_name + "set_speed"
             srv = rospy.ServiceProxy(service, SetSpeed)
