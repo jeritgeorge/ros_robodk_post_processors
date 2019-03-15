@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # license removed for brevity
 import rospy
+from ros_robodk_post_processors.srv import *
 from trajectory_msgs.msg import JointTrajectory
 from trajectory_msgs.msg import JointTrajectoryPoint
 from rpgatta_msgs.msg import MotionPlan
@@ -10,9 +11,12 @@ from rpgatta_msgs.msg import RobotProcessPath
 from rpgatta_msgs.msg import ProcessType
 from std_msgs.msg import String
 
+service_base_name = "/robodk_post_processors/"
+
 def talker():
     pub = rospy.Publisher('chatter', MotionPlan, queue_size=10)
     rospy.init_node('talker', anonymous=True)
+    rospy.wait_for_service(service_base_name + "generate_robot_program")
     rate = rospy.Rate(1) # 1hz
     while not rospy.is_shutdown():
         motionPlan = MotionPlan()
@@ -119,7 +123,17 @@ def talker():
         motionPlan.transitions = transitions
         motionPlan.to_home = toHome
 
-        pub.publish(motionPlan)
+        #pub.publish(motionPlan)
+
+        #------generate_robot_program-----
+        service = service_base_name + "generate_robot_program"
+        srv = rospy.ServiceProxy(service, GenerateRobotProgram)
+        success = False
+        try:
+            resp = srv(motionPlan)
+            success = True
+        except rospy.ServiceException as exc:
+            rospy.logerr("Service did not process request: " + str(exc))
         rate.sleep()
 
 if __name__ == '__main__':

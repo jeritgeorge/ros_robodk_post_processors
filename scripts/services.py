@@ -278,6 +278,49 @@ def wait_di(req):
     return [""]
 
 #---------------------High level LS generation services-------------------
+def generate_robot_program(req):
+    global previousTool
+    global previousToolSetting
+    previousTool = 0
+    previousToolSetting = -1
+    data = req.plan
+    programNameList = []
+    try:
+        if data.from_home is not None:
+            programNameList.append([createProgramName(len(programNameList)+1), "fromHome"])
+            createLSfromRobotProcessPath(data.from_home, programNameList[-1][0], programNameList[-1][1])
+    except rospy.ServiceException as exc:
+        rospy.logerr("error: " + str(exc))
+
+    try:
+        i = 0
+        for segment in data.segments:
+            
+            if segment is not None and not (segment == ProcessSegment()):
+                rospy.loginfo("%s" % segment)
+                if segment.approach is not None and not (segment.approach == RobotProcessPath()):
+                    programNameList.append([createProgramName(len(programNameList)+1),"approach" + str(i)])
+                    createLSfromRobotProcessPath(segment.approach, programNameList[-1][0], programNameList[-1][1])
+                if segment.process is not None and not (segment.process == RobotProcessPath()):
+                    programNameList.append([createProgramName(len(programNameList)+1),"process" + str(i)])
+                    createLSfromRobotProcessPath(segment.process, programNameList[-1][0], programNameList[-1][1])
+                if segment.departure is not None and not (segment.departure == RobotProcessPath()):
+                    programNameList.append([createProgramName(len(programNameList)+1),"departure" + str(i)])
+                    createLSfromRobotProcessPath(segment.departure, programNameList[-1][0], programNameList[-1][1])
+            i = i + 1
+    except rospy.ServiceException as exc:
+        rospy.logerr("error: " + str(exc))     
+
+    try:
+        if data.to_home is not None:
+            programNameList.append([createProgramName(len(programNameList)+1),"toHome"])
+            createLSfromRobotProcessPath(data.to_home, programNameList[-1][0], programNameList[-1][1])
+    except rospy.ServiceException as exc:
+        rospy.logerr("error: " + str(exc))   
+
+    createMasterLS("pns" + pnsNumber, programNameList)
+    return [""]
+#------------------------------support functions for generate robot program----------------------
 def createProgramName(number):
     return "ROS" + pnsNumber + "_" + str(number)
 
@@ -392,47 +435,7 @@ def setHighPressureWaterPressure(work):
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))  
 
-def generate_robot_program(req):
-    global previousTool
-    global previousToolSetting
-    previousTool = 0
-    previousToolSetting = -1
-    data = req.plan
-    programNameList = []
-    try:
-        if data.from_home is not None:
-            programNameList.append([createProgramName(len(programNameList)+1), "fromHome"])
-            createLSfromRobotProcessPath(data.from_home, programNameList[-1][0], programNameList[-1][1])
-    except rospy.ServiceException as exc:
-        rospy.logerr("error: " + str(exc))
 
-    try:
-        i = 0
-        for segment in data.segments:
-            
-            if segment is not None and not (segment == ProcessSegment()):
-                rospy.loginfo("%s" % segment)
-                if segment.approach is not None and not (segment.approach == RobotProcessPath()):
-                    programNameList.append([createProgramName(len(programNameList)+1),"approach" + str(i)])
-                    createLSfromRobotProcessPath(segment.approach, programNameList[-1][0], programNameList[-1][1])
-                if segment.process is not None and not (segment.process == RobotProcessPath()):
-                    programNameList.append([createProgramName(len(programNameList)+1),"process" + str(i)])
-                    createLSfromRobotProcessPath(segment.process, programNameList[-1][0], programNameList[-1][1])
-                if segment.departure is not None and not (segment.departure == RobotProcessPath()):
-                    programNameList.append([createProgramName(len(programNameList)+1),"departure" + str(i)])
-                    createLSfromRobotProcessPath(segment.departure, programNameList[-1][0], programNameList[-1][1])
-            i = i + 1
-    except rospy.ServiceException as exc:
-        rospy.logerr("error: " + str(exc))     
-
-    try:
-        if data.to_home is not None:
-            programNameList.append([createProgramName(len(programNameList)+1),"toHome"])
-            createLSfromRobotProcessPath(data.to_home, programNameList[-1][0], programNameList[-1][1])
-    except rospy.ServiceException as exc:
-        rospy.logerr("error: " + str(exc))   
-
-    createMasterLS("pns" + pnsNumber, programNameList)
 
 def createMasterLS(prgname, programList):
     #-----prog_start-----
@@ -475,12 +478,141 @@ def createMasterLS(prgname, programList):
     srv = rospy.ServiceProxy(service, ProgSave)
     success = False
     try:
-        resp = srv(prgname, "/home/controls/catkin_ws/src/ros_robodk_post_processors")
+        resp = srv(prgname, "/home/controls/catkin_ws/src/ros_robodk_post_processors/generated_program")
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
 
 def createLSfromRobotProcessPath(data, prgname, prgcomment): 
+    global previousTool
+    global previousToolSetting
+    #-----prog_start-----
+    service = service_base_name + "prog_start"
+    srv = rospy.ServiceProxy(service, ProgStart)
+    success = False
+    try:
+        resp = srv("Fanuc_R30iA", prgname, prgcomment)
+        success = True
+    except rospy.ServiceException as exc:
+        rospy.logerr("Service did not process request: " + str(exc))
+
+    #------set_tool-----
+    service = service_base_name + "set_tool"
+    srv = rospy.ServiceProxy(service, SetTool)
+    success = False
+    try:
+        resp = srv(1, "tool", geometry_msgs.msg.Pose(geometry_msgs.msg.Point(0, 0, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)))
+        success = True
+    except rospy.ServiceException as exc:
+        rospy.logerr("Service did not process request: " + str(exc))
+
+    #------set_frame-----
+    service = service_base_name + "set_frame"
+    srv = rospy.ServiceProxy(service, SetFrame)
+    success = False
+    try:
+        resp = srv(0, "frame", geometry_msgs.msg.Pose(geometry_msgs.msg.Point(0, 0, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)))
+        success = True
+    except rospy.ServiceException as exc:
+        rospy.logerr("Service did not process request: " + str(exc))
+
+
+    
+    if data.type.val == ProcessType.NONE:
+        if previousTool is not processToTool[ProcessType.NONE]:
+            setTool(processToTool[ProcessType.NONE])
+            turnToolOff()
+            previousTool = processToTool[ProcessType.NONE]
+        #for each point in the trajectory
+        for indx, point in enumerate(data.trajectory.points):    
+            #------set_speed_joints-----
+            service = service_base_name + "set_speed_joints"
+            srv = rospy.ServiceProxy(service, SetSpeedJoints)
+            success = False
+            try:
+                resp = srv(point.velocities[0]) #takes in degrees/sec, inserts % speed for joint moves
+                success = True
+            except rospy.ServiceException as exc:
+                rospy.logerr("Service did not process request: " + str(exc))
+                
+
+            #------move_j-----
+            service = service_base_name + "move_j"
+            srv = rospy.ServiceProxy(service, MoveJ)
+            success = False
+            try:
+                resp = srv(geometry_msgs.msg.Pose(geometry_msgs.msg.Point(1, 0, 0), geometry_msgs.msg.Quaternion(0, 0, 0, 1)),
+                            [point.positions[0], point.positions[1], point.positions[2], point.positions[3], point.positions[4], point.positions[5], point.positions[6], point.positions[7]],
+                            [0, 0, 0])
+                success = True
+            except rospy.ServiceException as exc:
+                rospy.logerr("Service did not process request: " + str(exc))
+    else:
+        if previousTool is not processToTool[data.type.val]:
+            setTool(processToTool[data.type.val])
+            previousTool = processToTool[data.type.val]
+        
+        #for each point in the trajectory
+        for indx, point in enumerate(data.trajectory.points):
+            #------set_tool rpm/pressure
+            if not previousToolSetting == data.tool_work[indx]:
+                rospy.loginfo(prgcomment + " %s" % str(indx))
+                rospy.loginfo("previous setting: %s" % str(previousToolSetting))
+                rospy.loginfo("new setting: %s" % str(data.tool_work[indx]))
+                #if agitator set brush rpm
+                if previousTool == processToTool[ProcessType.CHEMICAL_DEPAINT_AGITATE]:
+                    setAgitatorRPM(data.tool_work[indx])
+                #if high pressure water set rpm/pressure TODO
+                
+                if previousToolSetting == -1: #tool was off, so must turn on
+                    turnToolOn()
+                elif data.tool_work[indx] == -1: #tool was on, so must turn off
+                    turnToolOff()
+                previousToolSetting = data.tool_work[indx]
+
+            #------set_speed-----
+            service = service_base_name + "set_speed"
+            srv = rospy.ServiceProxy(service, SetSpeed)
+            success = False
+            try:
+                resp = srv(data.velocity[indx])
+                success = True
+            except rospy.ServiceException as exc:
+                rospy.logerr("Service did not process request: " + str(exc))
+
+            #------move_l-----
+            service = service_base_name + "move_l"
+            srv = rospy.ServiceProxy(service, MoveL)
+            success = False
+            try:
+                resp = srv(None,
+                            [point.positions[0], point.positions[1], point.positions[2], point.positions[3], point.positions[4], point.positions[5], point.positions[6], point.positions[7]],
+                            [0, 0, 0])
+                success = True
+            except rospy.ServiceException as exc:
+                rospy.logerr("Service did not process request: " + str(exc))
+        
+
+    #------prog_finish-----
+    service = service_base_name + "prog_finish"
+    srv = rospy.ServiceProxy(service, ProgFinish)
+    success = False
+    try:
+        resp = srv(prgname)
+        success = True
+    except rospy.ServiceException as exc:
+        rospy.logerr("Service did not process request: " + str(exc))
+    
+
+    #------prog_save-----
+    service = service_base_name + "prog_save"
+    srv = rospy.ServiceProxy(service, ProgSave)
+    success = False
+    try:
+        resp = srv(prgname, "/home/controls/catkin_ws/src/ros_robodk_post_processors/generated_program")
+        success = True
+    except rospy.ServiceException as exc:
+        rospy.logerr("Service did not process request: " + str(exc))
 #---------------------End High level LS generation services --------------
 
 # Common services
