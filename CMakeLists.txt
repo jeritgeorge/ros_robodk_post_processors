@@ -41,6 +41,7 @@ add_service_files(
   SetTool.srv
   SetZoneData.srv
   WaitDI.srv
+  GenerateRobotProgram.srv
 )
 
 # Motoman specifics

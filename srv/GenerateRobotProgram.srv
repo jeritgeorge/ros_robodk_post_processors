@@ -1,0 +1,4 @@
+rpgatta_msgs/MotionPlan plan # milliseconds
+---
+# Success if empty
+string error
