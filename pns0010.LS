@@ -19,11 +19,11 @@ TCD:  STACK_SIZE	= 0,
 DEFAULT_GROUP	= 1,*,*,*,*,*,*;
 CONTROL_CODE	= 00000000 00000000;
 /MN
-   1:  CALL fromHome ;
-   2:  CALL approach0 ;
-   3:  CALL process0 ;
-   4:  CALL departure0 ;
-   5:  CALL process1 ;
-   6:  CALL toHome ;
+   1:  CALL ROS0010_1 ;
+   2:  CALL ROS0010_2 ;
+   3:  CALL ROS0010_3 ;
+   4:  CALL ROS0010_4 ;
+   5:  CALL ROS0010_5 ;
+   6:  CALL ROS0010_6 ;
 /POS
 /END

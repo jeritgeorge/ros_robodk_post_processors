@@ -33,6 +33,7 @@ def talker():
 
         point=JointTrajectoryPoint()
         point2=JointTrajectoryPoint()
+        point3=JointTrajectoryPoint()
 
         trajectory.header.stamp=rospy.Time.now()
         trajectory.header.frame_id = "/base_link"
@@ -66,17 +67,28 @@ def talker():
         point2.positions.append(-1500.0)
         point2.velocities.append(15.0)
 
+        point3.positions.append(-90.0)
+        point3.positions.append(-65.0)
+        point3.positions.append(0.0)
+        point3.positions.append(-180.0)
+        point3.positions.append(-60.0)
+        point3.positions.append(0.0)
+        point3.positions.append(-2000.0)
+        point3.positions.append(-2000.0)
+        point3.velocities.append(15.0)
+
         trajectory.points.append(point)
         trajectory.points.append(point2)
+        trajectory.points.append(point3)
 
         examplePath.trajectory = trajectory
-        examplePath.velocity = [100, 101.1]
-        examplePath.tool_work = [1, 1]
+        examplePath.velocity = [100, 200, 100]
+        examplePath.tool_work = [-1, -1, -1]
         examplePath.type = processTypeMove
 
         examplePathProcess.trajectory = trajectory
-        examplePathProcess.velocity = [100, 101.1]
-        examplePathProcess.tool_work = [1, 1]
+        examplePathProcess.velocity = [100, 200, 100]
+        examplePathProcess.tool_work = [-1, 0, 1]
         examplePathProcess.type = processType
 
         #initialize fromHome

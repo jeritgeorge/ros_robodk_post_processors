@@ -14,7 +14,9 @@ import rospy
 import unittest 
 
 previousTool = 0
-previousToolSetting = 0
+previousToolSetting = -1  #-1 is off, 0-1 for minimum to maximum work
+
+pnsNumber = "0010"  #0010
 
 processToTool = {
 		ProcessType.NONE : 0,
@@ -31,6 +33,8 @@ HPRPM_MAX = 2500
 HPPRESSURE_MIN = 3000
 HPPRESSURE_MAX = 15000
 
+def createProgramName(number):
+    return "ROS" + pnsNumber + "_" + str(number)
 
 def turnToolOn():
     #------set_do-----
@@ -102,19 +106,19 @@ def setTool(Tool):
         srv = rospy.ServiceProxy(service, SetGO)
         success = False
         try:
-            resp = srv('12', Tool) #GO[12] is tool selection
+            resp = srv('12', str(Tool)) #GO[12] is tool selection
             success = True
         except rospy.ServiceException as exc:
             rospy.logerr("Service did not process request: " + str(exc))
 
 def setAgitatorRPM(work):
     #------set_go-----
-    rpm = ((AGITATORRPM_MAX-AGITATORRPM_MIN) * work) + AGITATORRPM_MIN 
+    rpm = max(min(((AGITATORRPM_MAX-AGITATORRPM_MIN) * work) + AGITATORRPM_MIN, AGITATORRPM_MAX),AGITATORRPM_MIN)
     service = service_base_name + "set_go"
     srv = rospy.ServiceProxy(service, SetGO)
     success = False
     try:
-        resp = srv('5', rpm) #GO[12] is tool selection
+        resp = srv('5', str(rpm)) #GO[12] is tool selection
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))            
@@ -126,7 +130,7 @@ def setHighPressureWaterRPM(work):
     srv = rospy.ServiceProxy(service, SetGO)
     success = False
     try:
-        resp = srv('6', rpm) #GO[12] is tool selection
+        resp = srv('6', str(rpm)) #GO[12] is tool selection
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))  
@@ -138,17 +142,21 @@ def setHighPressureWaterPressure(work):
     srv = rospy.ServiceProxy(service, SetGO)
     success = False
     try:
-        resp = srv('7', p) #GO[12] is tool selection
+        resp = srv('7', str(p)) #GO[12] is tool selection
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))  
 
 def callback(data):
+    global previousTool
+    global previousToolSetting
+    previousTool = 0
+    previousToolSetting = -1
     programNameList = []
     try:
         if data.from_home is not None:
-            programNameList.append("fromHome")
-            createLSfromRobotProcessPath(data.from_home, programNameList[-1])
+            programNameList.append([createProgramName(len(programNameList)+1), "fromHome"])
+            createLSfromRobotProcessPath(data.from_home, programNameList[-1][0], programNameList[-1][1])
     except rospy.ServiceException as exc:
         rospy.logerr("error: " + str(exc))
 
@@ -159,26 +167,26 @@ def callback(data):
             if segment is not None and not (segment == ProcessSegment()):
                 rospy.loginfo("%s" % segment)
                 if segment.approach is not None and not (segment.approach == RobotProcessPath()):
-                    programNameList.append("approach" + str(i))
-                    createLSfromRobotProcessPath(segment.approach, programNameList[-1])
+                    programNameList.append([createProgramName(len(programNameList)+1),"approach" + str(i)])
+                    createLSfromRobotProcessPath(segment.approach, programNameList[-1][0], programNameList[-1][1])
                 if segment.process is not None and not (segment.process == RobotProcessPath()):
-                    programNameList.append("process" + str(i))
-                    createLSfromRobotProcessPath(segment.process, programNameList[-1])
+                    programNameList.append([createProgramName(len(programNameList)+1),"process" + str(i)])
+                    createLSfromRobotProcessPath(segment.process, programNameList[-1][0], programNameList[-1][1])
                 if segment.departure is not None and not (segment.departure == RobotProcessPath()):
-                    programNameList.append("departure" + str(i))
-                    createLSfromRobotProcessPath(segment.departure, programNameList[-1])
+                    programNameList.append([createProgramName(len(programNameList)+1),"departure" + str(i)])
+                    createLSfromRobotProcessPath(segment.departure, programNameList[-1][0], programNameList[-1][1])
             i = i + 1
     except rospy.ServiceException as exc:
         rospy.logerr("error: " + str(exc))     
 
     try:
         if data.to_home is not None:
-            programNameList.append("toHome")
-            createLSfromRobotProcessPath(data.to_home, programNameList[-1])
+            programNameList.append([createProgramName(len(programNameList)+1),"toHome"])
+            createLSfromRobotProcessPath(data.to_home, programNameList[-1][0], programNameList[-1][1])
     except rospy.ServiceException as exc:
         rospy.logerr("error: " + str(exc))   
 
-    createMasterLS("pns0010", programNameList)
+    createMasterLS("pns" + pnsNumber, programNameList)
 
 def createMasterLS(prgname, programList):
     #-----prog_start-----
@@ -198,7 +206,7 @@ def createMasterLS(prgname, programList):
         srv = rospy.ServiceProxy(service, RunCode)
         success = False
         try:
-            resp = srv(programName, True)
+            resp = srv(programName[0], True)
             success = True
         except rospy.ServiceException as exc:
             rospy.logerr("Service did not process request: " + str(exc))
@@ -226,14 +234,15 @@ def createMasterLS(prgname, programList):
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
 
-def createLSfromRobotProcessPath(data, prgname): 
-
+def createLSfromRobotProcessPath(data, prgname, prgcomment): 
+    global previousTool
+    global previousToolSetting
     #-----prog_start-----
     service = service_base_name + "prog_start"
     srv = rospy.ServiceProxy(service, ProgStart)
     success = False
     try:
-        resp = srv("Fanuc_R30iA", prgname, "test_comment")
+        resp = srv("Fanuc_R30iA", prgname, prgcomment)
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
@@ -263,7 +272,7 @@ def createLSfromRobotProcessPath(data, prgname):
     if data.type.val == ProcessType.NONE:
         if previousTool is not processToTool[ProcessType.NONE]:
             setTool(processToTool[ProcessType.NONE])
-            turnToolOff(previousTool)
+            turnToolOff()
             previousTool = processToTool[ProcessType.NONE]
         #for each point in the trajectory
         for indx, point in enumerate(data.trajectory.points):    
@@ -297,15 +306,18 @@ def createLSfromRobotProcessPath(data, prgname):
         #for each point in the trajectory
         for indx, point in enumerate(data.trajectory.points):
             #------set_tool rpm/pressure
-            if previousToolSetting is not data.tool_work[indx]:
+            if not previousToolSetting == data.tool_work[indx]:
+                rospy.loginfo(prgcomment + " %s" % str(indx))
+                rospy.loginfo("previous setting: %s" % str(previousToolSetting))
+                rospy.loginfo("new setting: %s" % str(data.tool_work[indx]))
                 #if agitator set brush rpm
                 if previousTool == processToTool[ProcessType.CHEMICAL_DEPAINT_AGITATE]:
                     setAgitatorRPM(data.tool_work[indx])
                 #if high pressure water set rpm/pressure TODO
                 
-                if previousToolSetting == 0: #tool was off, so must turn on
+                if previousToolSetting == -1: #tool was off, so must turn on
                     turnToolOn()
-                else if data.tool_work[indx] == 0: #tool was on, so must turn off
+                elif data.tool_work[indx] == -1: #tool was on, so must turn off
                     turnToolOff()
                 previousToolSetting = data.tool_work[indx]
 
