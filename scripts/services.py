@@ -406,31 +406,31 @@ def setAgitatorRPM(work):
     srv = rospy.ServiceProxy(service, SetGO)
     success = False
     try:
-        resp = srv('5', str(rpm)) #GO[12] is tool selection
+        resp = srv('5', str(rpm)) #GO[5] is agitator rpm
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))            
 
 def setHighPressureWaterRPM(work):
     #------set_go-----
-    rpm = ((HPRPM_MAX-HPRPM_MIN) * work) + HPRPM_MIN 
+    rpm = max(min(((HPRPM_MAX-HPRPM_MIN) * work) + HPRPM_MIN, HPRPM_MAX),HPRPM_MIN)
     service = service_base_name + "set_go"
     srv = rospy.ServiceProxy(service, SetGO)
     success = False
     try:
-        resp = srv('6', str(rpm)) #GO[12] is tool selection
+        resp = srv('6', str(rpm)) #GO[6] is HP RPM
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))  
 
 def setHighPressureWaterPressure(work):
     #------set_go-----
-    p = ((HPPRESSURE_MAX-HPPRESSURE_MIN) * work) + HPPRESSURE_MIN 
+    p = max(min(((HPPRESSURE_MAX-HPPRESSURE_MIN) * work) + HPPRESSURE_MIN, HPPRESSURE_MAX),HPPRESSURE_MIN)
     service = service_base_name + "set_go"
     srv = rospy.ServiceProxy(service, SetGO)
     success = False
     try:
-        resp = srv('7', str(p)) #GO[12] is tool selection
+        resp = srv('7', str(p)) #GO[7] is pressure
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))  
