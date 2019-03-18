@@ -124,6 +124,8 @@ class RobotPost(object):
         del self.AXES_TRACK[:]
         #self.HAS_TRACK = True
         self.PROG = []
+        self.PROG_LIST = []
+        self.PROG_FILES = []
         self.LOG = ''
         #for k,v in kwargs.iteritems(): # python2
         for k,v in kwargs.items():

@@ -27,7 +27,7 @@
 # More information about the RoboDK API for Python here:
 #     http://www.robodk.com/doc/PythonAPI/index.html
 # --------------------------------------------
-
+import rospy
 import math
 import operator
 import sys
@@ -1277,6 +1277,7 @@ def UploadFileFTP(file_path_name, server_ip, remote_path, username, password):
     except:
         error_str = sys.exc_info()[1]
         print("POPUP: <font color=\"red\">Connection to %s failed: <p>%s</p></font>" % (server_ip,error_str))
+        rospy.logerr("POPUP: <font color=\"red\">Connection to %s failed: <p>%s</p></font>" % (server_ip,error_str))
         sys.stdout.flush()
         pause(4)
         return False
@@ -1292,6 +1293,7 @@ def UploadFileFTP(file_path_name, server_ip, remote_path, username, password):
     except:
         error_str = sys.exc_info()[1]
         print("POPUP: <font color=\"red\">Remote path not found or can't be created: %s</font>" % (remote_path))
+        rospy.logerr("POPUP: <font color=\"red\">Remote path not found or can't be created: %s</font>" % (remote_path))
         sys.stdout.flush()
         pause(4)
         #contin = mbox("Remote path\n%s\nnot found or can't create folder.\n\nChange path and permissions and retry." % remote_path)
@@ -1323,6 +1325,7 @@ def UploadFTP(program, robot_ip, remote_path, ftp_user, ftp_pass):
     import os
     if os.path.isfile(program):
         print('Sending program file %s...' % program)
+        rospy.loginfo('Sending program file %s...' % program)
         UploadFileFTP(program, robot_ip, remote_path, ftp_user, ftp_pass)
     else:
         print('Sending program folder %s...' % program)

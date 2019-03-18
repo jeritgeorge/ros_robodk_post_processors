@@ -290,14 +290,14 @@ def generate_robot_program(req):
             programNameList.append([createProgramName(len(programNameList)+1), "fromHome"])
             createLSfromRobotProcessPath(data.from_home, programNameList[-1][0], programNameList[-1][1])
     except rospy.ServiceException as exc:
-        rospy.logerr("error: " + str(exc))
+        rospy.logerr("error from Home: " + str(exc))
 
     try:
         i = 0
         for segment in data.segments:
             
             if segment is not None and not (segment == ProcessSegment()):
-                rospy.loginfo("%s" % segment)
+                #rospy.loginfo("%s" % segment)
                 if segment.approach is not None and not (segment.approach == RobotProcessPath()):
                     programNameList.append([createProgramName(len(programNameList)+1),"approach" + str(i)])
                     createLSfromRobotProcessPath(segment.approach, programNameList[-1][0], programNameList[-1][1])
@@ -309,14 +309,14 @@ def generate_robot_program(req):
                     createLSfromRobotProcessPath(segment.departure, programNameList[-1][0], programNameList[-1][1])
             i = i + 1
     except rospy.ServiceException as exc:
-        rospy.logerr("error: " + str(exc))     
+        rospy.logerr("error segment: " + str(exc))     
 
     try:
         if data.to_home is not None:
             programNameList.append([createProgramName(len(programNameList)+1),"toHome"])
             createLSfromRobotProcessPath(data.to_home, programNameList[-1][0], programNameList[-1][1])
     except rospy.ServiceException as exc:
-        rospy.logerr("error: " + str(exc))   
+        rospy.logerr("error to home: " + str(exc))   
 
     createMasterLS("pns" + pnsNumber, programNameList)
     return [""]
@@ -483,6 +483,16 @@ def createMasterLS(prgname, programList):
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
 
+        #------prog_save-----
+    service = service_base_name + "prog_send_robot"
+    srv = rospy.ServiceProxy(service, ProgSendRobot)
+    success = False
+    try:
+        resp = srv("10.0.1.125", "/md:", "user", "password")
+        success = True
+    except rospy.ServiceException as exc:
+        rospy.logerr("Service did not process request: " + str(exc))
+
 def createLSfromRobotProcessPath(data, prgname, prgcomment): 
     global previousTool
     global previousToolSetting
@@ -556,9 +566,9 @@ def createLSfromRobotProcessPath(data, prgname, prgcomment):
         for indx, point in enumerate(data.trajectory.points):
             #------set_tool rpm/pressure
             if not previousToolSetting == data.tool_work[indx]:
-                rospy.loginfo(prgcomment + " %s" % str(indx))
-                rospy.loginfo("previous setting: %s" % str(previousToolSetting))
-                rospy.loginfo("new setting: %s" % str(data.tool_work[indx]))
+                #rospy.loginfo(prgcomment + " %s" % str(indx))
+                #rospy.loginfo("previous setting: %s" % str(previousToolSetting))
+                #rospy.loginfo("new setting: %s" % str(data.tool_work[indx]))
                 #if agitator set brush rpm
                 if previousTool == processToTool[ProcessType.CHEMICAL_DEPAINT_AGITATE]:
                     setAgitatorRPM(data.tool_work[indx])
