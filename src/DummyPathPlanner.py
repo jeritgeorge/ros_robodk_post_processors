@@ -27,7 +27,7 @@ def talker():
         examplePath = RobotProcessPath()
         examplePathProcess = RobotProcessPath()
         processType = ProcessType()
-        processType.val = ProcessType.CHEMICAL_DEPAINT_AGITATE
+        processType.val = ProcessType.CHEMICAL_DEPAINT_WASH
 
         processTypeMove = ProcessType()
         processTypeMove.val = ProcessType.NONE

@@ -44,7 +44,7 @@
 def get_safe_name(progname, max_chars = 10):
     """Get a safe program name"""
     # Remove special characters
-    for c in r'-[]/\;,><&*:%=+@!#^()|?^':
+    for c in r'-[]/\;,><&*:%=+@!#^|?^': #removed ()
         progname = progname.replace(c,'')
     # Set a program name by default:
     if len(progname) <= 0:
@@ -507,7 +507,7 @@ class RobotPost(object):
     def RunCode(self, code, is_function_call = False):
         """Adds code or a function call"""
         if is_function_call:
-            code = get_safe_name(code, 12)
+            code = get_safe_name(code, 40)
             if code.startswith("ArcStart"):
                 if not code.endswith(')'):
                     code = code + '()'

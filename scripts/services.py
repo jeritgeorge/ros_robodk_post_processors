@@ -23,7 +23,7 @@ previousToolSetting = -1  #-1 is off, 0-1 for minimum to maximum work
 
 pnsNumber = "0010"  #0010
 
-robot_ip = "10.0.1.125"
+robot_ip = "192.168.20.150"
 
 processToTool = {
 		ProcessType.NONE : 0,
@@ -32,6 +32,13 @@ processToTool = {
 		ProcessType.CHEMICAL_DEPAINT_WASH : 3,
 		ProcessType.GRIT_BLAST_STRIP : 1,
 		ProcessType.SAND_STRIP : 1
+	}
+ToolName = {
+		ProcessType.CHEMICAL_DEPAINT_AGITATE : "AGITATOR",
+		ProcessType.CHEMICAL_DEPAINT_STRIP : "CHEM1",
+		ProcessType.CHEMICAL_DEPAINT_WASH : "HOT_WATER",
+		ProcessType.GRIT_BLAST_STRIP : "null",
+		ProcessType.SAND_STRIP : "null"
 	}
 AGITATORRPM_MIN = 5
 AGITATORRPM_MAX = 20
@@ -327,115 +334,86 @@ def createProgramName(number):
     return "ROS" + pnsNumber + "_" + str(number)
 
 def turnToolOn():
-    #------set_do-----
-    service = service_base_name + "set_do"
-    srv = rospy.ServiceProxy(service, SetDO)
+    #------run_code-----
+    service = service_base_name + "run_code"
+    srv = rospy.ServiceProxy(service, RunCode)
     success = False
     try:
-        resp = srv('96', True)
-        resp = srv('97', False)
+        resp = srv("TOOL_START_" + ToolName[previousTool], True)
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
 
-    #------wait_di-----
-    service = service_base_name + "wait_di"
-    srv = rospy.ServiceProxy(service, WaitDI)
-    success = False
-    try:
-        resp = srv('96', True, -1) #last value is timeout, enter less than 0 for no timeout
-        success = True
-    except rospy.ServiceException as exc:
-        rospy.logerr("Service did not process request: " + str(exc))
-
-    #------set_do-----
-    service = service_base_name + "set_do"
-    srv = rospy.ServiceProxy(service, SetDO)
-    success = False
-    try:
-        resp = srv('96', False)
-        success = True
-    except rospy.ServiceException as exc:
-        rospy.logerr("Service did not process request: " + str(exc))
+    
 
 def turnToolOff():
-    #------set_do-----
-    service = service_base_name + "set_do"
-    srv = rospy.ServiceProxy(service, SetDO)
+    #------run_code-----
+    service = service_base_name + "run_code"
+    srv = rospy.ServiceProxy(service, RunCode)
     success = False
     try:
-        resp = srv('97', True)
-        resp = srv('96', False)
+        resp = srv("TOOL_STOP_" + ToolName[previousTool], True)
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
 
-    #------wait_di-----
-    service = service_base_name + "wait_di"
-    srv = rospy.ServiceProxy(service, WaitDI)
+
+def setTool(Tool, work):
+    #------run_code-----
+    global previousTool
+    
+    service = service_base_name + "run_code"
+    srv = rospy.ServiceProxy(service, RunCode)
     success = False
+    arguments = ""
+    if(previousTool == ProcessType.CHEMICAL_DEPAINT_AGITATE):
+        arguments = str(setAgitatorRPM(work))
+    #do arguments for high pressure here
     try:
-        resp = srv('97', True, -1) #last value is timeout, enter less than 0 for no timeout
+        resp = srv("TOOL_SET_PARAMS_" + ToolName[previousTool] + "(" + arguments + ")", True)
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
 
-    #------set_do-----
-    service = service_base_name + "set_do"
-    srv = rospy.ServiceProxy(service, SetDO)
+def changeTool(Tool, work):
+    #------run_code-----
+    global previousTool
+    rospy.loginfo(Tool)
+    if(Tool == ProcessType.NONE):
+        return
+    service = service_base_name + "run_code"
+    srv = rospy.ServiceProxy(service, RunCode)
     success = False
+    arguments = ""
+    if(Tool == ProcessType.CHEMICAL_DEPAINT_AGITATE):
+        arguments = str(setAgitatorRPM(work))
+    #do arguments for high pressure here
+    rospy.loginfo(arguments)
+    rospy.loginfo("TOOL_CHANGE_" + ToolName[Tool] + "(" + arguments + ")")
     try:
-        resp = srv('97', False)
+        resp = srv("TOOL_CHANGE_" + ToolName[Tool] + "(" + arguments + ")", True)
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
 
-def setTool(Tool):
-    #------set_go-----
-        service = service_base_name + "set_go"
-        srv = rospy.ServiceProxy(service, SetGO)
-        success = False
-        try:
-            resp = srv('12', str(Tool)) #GO[12] is tool selection
-            success = True
-        except rospy.ServiceException as exc:
-            rospy.logerr("Service did not process request: " + str(exc))
+    previousTool = Tool
+
+
 
 def setAgitatorRPM(work):
     #------set_go-----
     rpm = max(min(((AGITATORRPM_MAX-AGITATORRPM_MIN) * work) + AGITATORRPM_MIN, AGITATORRPM_MAX),AGITATORRPM_MIN)
-    service = service_base_name + "set_go"
-    srv = rospy.ServiceProxy(service, SetGO)
-    success = False
-    try:
-        resp = srv('5', str(rpm)) #GO[5] is agitator rpm
-        success = True
-    except rospy.ServiceException as exc:
-        rospy.logerr("Service did not process request: " + str(exc))            
+    return rpm        
 
 def setHighPressureWaterRPM(work):
     #------set_go-----
     rpm = max(min(((HPRPM_MAX-HPRPM_MIN) * work) + HPRPM_MIN, HPRPM_MAX),HPRPM_MIN)
-    service = service_base_name + "set_go"
-    srv = rospy.ServiceProxy(service, SetGO)
-    success = False
-    try:
-        resp = srv('6', str(rpm)) #GO[6] is HP RPM
-        success = True
-    except rospy.ServiceException as exc:
-        rospy.logerr("Service did not process request: " + str(exc))  
+    return rpm 
 
 def setHighPressureWaterPressure(work):
     #------set_go-----
     p = max(min(((HPPRESSURE_MAX-HPPRESSURE_MIN) * work) + HPPRESSURE_MIN, HPPRESSURE_MAX),HPPRESSURE_MIN)
-    service = service_base_name + "set_go"
-    srv = rospy.ServiceProxy(service, SetGO)
-    success = False
-    try:
-        resp = srv('7', str(p)) #GO[7] is pressure
-        success = True
-    except rospy.ServiceException as exc:
-        rospy.logerr("Service did not process request: " + str(exc))  
+    return p
 
 
 
@@ -531,10 +509,11 @@ def createLSfromRobotProcessPath(data, prgname, prgcomment):
 
     
     if data.type.val == ProcessType.NONE:
-        if previousTool is not processToTool[ProcessType.NONE]:
-            setTool(processToTool[ProcessType.NONE])
+        if previousTool is not ProcessType.NONE:
             turnToolOff()
-            previousTool = processToTool[ProcessType.NONE]
+            #to do, do we change tool on none?
+            #changeTool(ProcessType.NONE, 0)
+            previousTool = ProcessType.NONE
         #for each point in the trajectory
         for indx, point in enumerate(data.trajectory.points):    
             #------set_speed_joints-----
@@ -560,9 +539,9 @@ def createLSfromRobotProcessPath(data, prgname, prgcomment):
             except rospy.ServiceException as exc:
                 rospy.logerr("Service did not process request: " + str(exc))
     else:
-        if previousTool is not processToTool[data.type.val]:
-            setTool(processToTool[data.type.val])
-            previousTool = processToTool[data.type.val]
+        if previousTool is not data.type.val:
+            changeTool(data.type.val, 0)
+            
         
         #for each point in the trajectory
         for indx, point in enumerate(data.trajectory.points):
@@ -570,12 +549,11 @@ def createLSfromRobotProcessPath(data, prgname, prgcomment):
             if not previousToolSetting == data.tool_work[indx]:
                 #rospy.loginfo(prgcomment + " %s" % str(indx))
                 #rospy.loginfo("previous setting: %s" % str(previousToolSetting))
-                #rospy.loginfo("new setting: %s" % str(data.tool_work[indx]))
-                #if agitator set brush rpm
-                if previousTool == processToTool[ProcessType.CHEMICAL_DEPAINT_AGITATE]:
-                    setAgitatorRPM(data.tool_work[indx])
-                #if high pressure water set rpm/pressure TODO
-                
+                #rospy.loginfo("new setting: %s" % str(data.tool_work[indx])
+
+                #modify tool work here
+                setTool(previousTool, data.tool_work[indx])
+
                 if previousToolSetting == -1: #tool was off, so must turn on
                     turnToolOn()
                 elif data.tool_work[indx] == -1: #tool was on, so must turn off
