@@ -464,18 +464,19 @@ def createMasterLS(prgname, programList):
         rospy.logerr("Service did not process request: " + str(exc))
 
     #------prog_send_robot-----
-    service = service_base_name + "prog_send_robot"
-    srv = rospy.ServiceProxy(service, ProgSendRobot)
-    success = False
-    try:
-        robot_ip = rospy.get_param(rospy.resolve_name('~robot_ip'), '192.168.1.100')
-        username = rospy.get_param(rospy.resolve_name('~username'), 'user')
-        password = rospy.get_param(rospy.resolve_name('~password'), '')
+    if  rospy.get_param(rospy.resolve_name('~send_prog'), True):
+        service = service_base_name + "prog_send_robot"
+        srv = rospy.ServiceProxy(service, ProgSendRobot)
+        success = False
+        try:
+            robot_ip = rospy.get_param(rospy.resolve_name('~robot_ip'), '192.168.1.100')
+            username = rospy.get_param(rospy.resolve_name('~username'), 'user')
+            password = rospy.get_param(rospy.resolve_name('~password'), '')
 
-        resp = srv( robot_ip , "/md:", username, password)
-        success = True
-    except rospy.ServiceException as exc:
-        rospy.logerr("Service did not process request: " + str(exc))
+            resp = srv( robot_ip , "/md:", username, password)
+            success = True
+        except rospy.ServiceException as exc:
+            rospy.logerr("Service did not process request: " + str(exc))
 
 def createLSfromRobotProcessPath(data, prgname, prgcomment): 
     global previousTool
@@ -620,18 +621,20 @@ def createLSfromRobotProcessPath(data, prgname, prgcomment):
         rospy.logerr("Service did not process request: " + str(exc))
 
     #------prog_send_robot-----
-    service = service_base_name + "prog_send_robot"
-    srv = rospy.ServiceProxy(service, ProgSendRobot)
-    success = False
-    try:
-        robot_ip = rospy.get_param(rospy.resolve_name('~robot_ip'), '192.168.1.100')
-        username = rospy.get_param(rospy.resolve_name('~username'), 'user')
-        password = rospy.get_param(rospy.resolve_name('~password'), '')
+    if rospy.get_param(rospy.resolve_name('~send_prog'), True):
+        rospy.loginfo('Sending LS file to the robot')
+        service = service_base_name + "prog_send_robot"
+        srv = rospy.ServiceProxy(service, ProgSendRobot)
+        success = False
+        try:
+            robot_ip = rospy.get_param(rospy.resolve_name('~robot_ip'), '192.168.1.100')
+            username = rospy.get_param(rospy.resolve_name('~username'), 'user')
+            password = rospy.get_param(rospy.resolve_name('~password'), '')
 
-        resp = srv( robot_ip , "/md:", username, password)
-        success = True
-    except rospy.ServiceException as exc:
-        rospy.logerr("Service did not process request: " + str(exc))
+            resp = srv( robot_ip , "/md:", username, password)
+            success = True
+        except rospy.ServiceException as exc:
+            rospy.logerr("Service did not process request: " + str(exc))
 #---------------------End High level LS generation services --------------
 
 # Common services
