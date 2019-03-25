@@ -23,8 +23,6 @@ previousToolSetting = -1  #-1 is off, 0-1 for minimum to maximum work
 
 pnsNumber = "0010"  #0010
 
-robot_ip = "192.168.20.150"
-
 processToTool = {
 		ProcessType.NONE : 0,
 		ProcessType.CHEMICAL_DEPAINT_AGITATE : 1,
@@ -468,7 +466,11 @@ def createMasterLS(prgname, programList):
     srv = rospy.ServiceProxy(service, ProgSendRobot)
     success = False
     try:
-        resp = srv(robot_ip, "/md:", "user", "password")
+        robot_ip = rospy.get_param(rospy.resolve_name('~robot_ip'), '192.168.1.100')
+        username = rospy.get_param(rospy.resolve_name('~username'), 'user')
+        password = rospy.get_param(rospy.resolve_name('~password'), '')
+
+        resp = srv( robot_ip , "/md:", username, password)
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
@@ -619,7 +621,11 @@ def createLSfromRobotProcessPath(data, prgname, prgcomment):
     srv = rospy.ServiceProxy(service, ProgSendRobot)
     success = False
     try:
-        resp = srv(robot_ip, "/md:", "user", "password")
+        robot_ip = rospy.get_param(rospy.resolve_name('~robot_ip'), '192.168.1.100')
+        username = rospy.get_param(rospy.resolve_name('~username'), 'user')
+        password = rospy.get_param(rospy.resolve_name('~password'), '')
+
+        resp = srv( robot_ip , "/md:", username, password)
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
