@@ -17,6 +17,7 @@ from rpgatta_msgs.msg import RobotProcessPath
 from rpgatta_msgs.msg import ProcessType
 import motoman
 import rospy
+import rospkg
 
 previousTool = 0
 previousToolSetting = -1  #-1 is off, 0-1 for minimum to maximum work
@@ -456,7 +457,8 @@ def createMasterLS(prgname, programList):
     srv = rospy.ServiceProxy(service, ProgSave)
     success = False
     try:
-        resp = srv(prgname, "/home/controls/catkin_ws/src/ros_robodk_post_processors/generated_program")
+        rospack = rospkg.RosPack()
+        resp = srv(prgname, rospack.get_path('ros_robodk_post_processors') + '/generated_program')
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
@@ -611,7 +613,8 @@ def createLSfromRobotProcessPath(data, prgname, prgcomment):
     srv = rospy.ServiceProxy(service, ProgSave)
     success = False
     try:
-        resp = srv(prgname, "/home/controls/catkin_ws/src/ros_robodk_post_processors/generated_program")
+        rospack = rospkg.RosPack()
+        resp = srv(prgname, rospack.get_path('ros_robodk_post_processors') + '/generated_program')
         success = True
     except rospy.ServiceException as exc:
         rospy.logerr("Service did not process request: " + str(exc))
