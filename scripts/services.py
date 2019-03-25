@@ -521,8 +521,13 @@ def createLSfromRobotProcessPath(data, prgname, prgcomment):
             srv = rospy.ServiceProxy(service, SetSpeedJoints)
             success = False
             try:
-                resp = srv(point.velocities[0]) #takes in degrees/sec, inserts % speed for joint moves
-                success = True
+                # If velocities is empty, set reasonable value.
+                try:
+                    resp = srv(point.velocities[0]) #takes in degrees/sec , inserts % speed for joint moves
+                    success = True
+                except IndexError:
+                    resp = srv(90) #takes in degrees/sec, inserts % speed for joint moves
+                    success = True
             except rospy.ServiceException as exc:
                 rospy.logerr("Service did not process request: " + str(exc))
                 
@@ -565,8 +570,13 @@ def createLSfromRobotProcessPath(data, prgname, prgcomment):
             srv = rospy.ServiceProxy(service, SetSpeed)
             success = False
             try:
-                resp = srv(data.velocity[indx])
-                success = True
+                # If velocities is empty, set reasonable value.
+                try:
+                    resp = srv(data.velocity[indx]) #takes in degrees/sec (For cartesian??), inserts % speed for joint moves
+                    success = True
+                except IndexError:
+                    resp = srv(0.1) #takes in degrees/sec, inserts % speed for joint moves
+                    success = True
             except rospy.ServiceException as exc:
                 rospy.logerr("Service did not process request: " + str(exc))
 
