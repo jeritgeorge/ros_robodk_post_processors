@@ -113,8 +113,8 @@ def talker():
         segments.append(exampleSegment)
         #initialize transitions
         exampleTransition = TransitionPair()
-        exampleTransition.front = examplePath
-        exampleTransition.back = examplePath
+        exampleTransition.from_start = examplePath
+        exampleTransition.from_end = examplePath
         transitions.append(exampleTransition)
 
         #asign parts to motionPLan
