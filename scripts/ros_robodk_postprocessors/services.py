@@ -24,20 +24,18 @@ previousToolSetting = -1  #-1 is off, 0-1 for minimum to maximum work
 
 pnsNumber = "0010"  #0010
 
-processToTool = {
-		ProcessType.NONE : 0,
-		ProcessType.CHEMICAL_DEPAINT_AGITATE : 1,
-		ProcessType.CHEMICAL_DEPAINT_STRIP : 11,
-		ProcessType.CHEMICAL_DEPAINT_WASH : 3,
-		ProcessType.GRIT_BLAST_STRIP : 1,
-		ProcessType.SAND_STRIP : 1
-	}
 ToolName = {
-		ProcessType.CHEMICAL_DEPAINT_AGITATE : "AGITATOR",
-		ProcessType.CHEMICAL_DEPAINT_STRIP : "CHEM1",
-		ProcessType.CHEMICAL_DEPAINT_WASH : "HOT_WATER",
-		ProcessType.GRIT_BLAST_STRIP : "null",
-		ProcessType.SAND_STRIP : "null"
+                ProcessType.NONE : "null",
+                ProcessType.CHEMICAL_DEPAINT_CHEM1 : "CHEM1",
+                ProcessType.CHEMICAL_DEPAINT_CHEM2 : "CHEM2",
+                ProcessType.CHEMICAL_DEPAINT_CHEM3 : "CHEM3",
+                ProcessType.CHEMICAL_DEPAINT_HOT_WATER : "HOT_WATER",
+                ProcessType.CHEMICAL_DEPAINT_HIGH_PRESSURE_WATER : "PRESSURIZED_WATER",
+                ProcessType.CHEMICAL_DEPAINT_STEAM : "STEAM",
+                ProcessType.CHEMICAL_DEPAINT_AGITATE : "AGITATOR",
+                ProcessType.GRIT_BLAST_STRIP : "null",
+                ProcessType.SAND_STRIP : "null",
+                ProcessType.LASER_TOUCHOFF : "null"
 	}
 AGITATORRPM_MIN = 5
 AGITATORRPM_MAX = 20
