@@ -25,42 +25,42 @@ catkin_python_setup()
 # Common services to all post-processors
 add_service_files(
   FILES
-  MoveC.srv
-  MoveJ.srv
-  MoveL.srv
-  Pause.srv
-  ProgFinish.srv
-  ProgSave.srv
-  ProgSendRobot.srv
-  ProgStart.srv
-  RunCode.srv
-  RunMessage.srv
-  SetDO.srv
-  SetGO.srv
-  SetFrame.srv
-  SetSpeed.srv
-  SetSpeedJoints.srv
-  SetTool.srv
-  SetZoneData.srv
-  WaitDI.srv
-  GenerateRobotProgram.srv
+    MoveC.srv
+    MoveJ.srv
+    MoveL.srv
+    Pause.srv
+    ProgFinish.srv
+    ProgSave.srv
+    ProgSendRobot.srv
+    ProgStart.srv
+    RunCode.srv
+    RunMessage.srv
+    SetDO.srv
+    SetGO.srv
+    SetFrame.srv
+    SetSpeed.srv
+    SetSpeedJoints.srv
+    SetTool.srv
+    SetZoneData.srv
+    WaitDI.srv
+    GenerateRobotProgram.srv
 )
 
 # Motoman specifics
 add_service_files(
   FILES
-  Motoman/Arcof.srv
-  Motoman/Arcon.srv
-  Motoman/DontUseMFrame.srv
-  Motoman/Macro.srv
-  Motoman/SetFolder.srv
+    Motoman/Arcof.srv
+    Motoman/Arcon.srv
+    Motoman/DontUseMFrame.srv
+    Motoman/Macro.srv
+    Motoman/SetFolder.srv
 )
 
 generate_messages(
   DEPENDENCIES
-  geometry_msgs
-  std_msgs
-  rpgatta_msgs
+    geometry_msgs
+    std_msgs
+    rpgatta_msgs
 )
 
 ################################################
@@ -73,12 +73,12 @@ generate_messages(
 
 catkin_package(
   CATKIN_DEPENDS
-  geometry_msgs
-  message_runtime
-  rospy
-  rostest
-  std_msgs
-  rpgatta_msgs
+    geometry_msgs
+    message_runtime
+    rospy
+    rostest
+    std_msgs
+    rpgatta_msgs
 )
 
 #############
@@ -88,21 +88,27 @@ catkin_package(
 # RoboDK post processors git submodule
 install(
   DIRECTORY
-  scripts/robodk_postprocessors/
+    src/robodk_post_processors/
   DESTINATION
-  ${CATKIN_PACKAGE_BIN_DESTINATION}/robodk_postprocessors/
+    ${CATKIN_PACKAGE_BIN_DESTINATION}/robodk_post_processors/
+)
+
+install(
+  DIRECTORY
+    src/ros_robodk_post_processors/
+  DESTINATION
+    ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 # Services servers
 install(
   PROGRAMS
-  scripts/config.py
-  scripts/motoman.py
-  scripts/services.py
+    scripts/services.py
+    scripts/ros_to_ls.py
+    scripts/DummyPathPlanner.py
   DESTINATION
-  ${CATKIN_PACKAGE_BIN_DESTINATION}
+    ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-
 
 #############
 ## Testing ##
@@ -112,6 +118,6 @@ if(CATKIN_ENABLE_TESTING)
   add_rostest(
     test/services.launch
     DEPENDENCIES
-    ${PROJECT_NAME}_generate_messages_cpp
+      ${PROJECT_NAME}_generate_messages_cpp
   )
 endif()
