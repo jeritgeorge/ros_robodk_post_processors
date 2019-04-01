@@ -1,37 +1,67 @@
-image: ros:melodic-robot
-
+image: docker:stable
 variables:
-  GIT_SUBMODULE_STRATEGY: normal
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_DRIVER: overlay2
+    ROS_DISTRO: kinetic
+    CATKIN_WS: /home/catkin_ws
+    CONTAINER_IMAGE: mrtd-gitlab.dyn.datasys.swri.edu:5005/10-23539/rars:latest
+
+services:
+    - docker:dind
 
 before_script:
-  - git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
-  - source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+    - apk update && apk add --no-cache wget git openssh-client bash
+    - (cd / && git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@mrtd-gitlab.dyn.datasys.swri.edu/mrtd_developers/mrtd_ci.git)
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
 
-catkin lint:
-  stage: build
-  image: ros:melodic-ros-core
-  before_script:
-    - apt update  >/dev/null 2>&1
-    - apt install -y python-catkin-lint >/dev/null 2>&1
-  script:
-    - catkin_lint -W3 .
+stages:
+    - setup
+    - build
+    - test
 
-catkin_make:
-  stage: build
-  script:
-    - catkin_make install
+setup:
+    stage: setup
+    tags:
+        - docker-docker
+    script:
+        - /mrtd_ci/mrtd_ci
 
-catkin tools:
-  stage: build
-  script:
-    - catkin config --install
-    - catkin build --summarize --no-status --force-color
+catkin_tools:
+    stage: build
+    tags:
+        - docker-docker
+    variables:
+        GIT_STRATEGY: none
+    script:
+        - /mrtd_ci/mrtd_ci
 
-catkin_make tests:
-  stage: test
-  script:
-    - catkin_make >/dev/null
-    - source devel/setup.bash
-    - catkin_make tests >/dev/null
-    - catkin_make run_tests
-    - catkin_test_results # Check if one of the tests failed!
+run_tests:
+    stage: test
+    tags:
+        - docker-docker
+    variables:
+        GIT_STRATEGY: none
+    allow_failure: true
+    script:
+        - /mrtd_ci/mrtd_ci
+
+clang_format:
+    stage: test
+    tags:
+        - docker-docker
+    variables:
+        GIT_STRATEGY: none
+    allow_failure: true
+    script:
+        - /mrtd_ci/mrtd_ci
+
+catkin_lint:
+    stage: test
+    tags:
+        - docker-docker
+    variables:
+        GIT_STRATEGY: none
+    allow_failure: true
+    script:
+        - /mrtd_ci/mrtd_ci
+
