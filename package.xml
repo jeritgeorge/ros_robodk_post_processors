@@ -13,9 +13,8 @@
   <depend>geometry_msgs</depend>
   <depend>rospy</depend>
   <depend>rostest</depend>
-  <depend>message_generation</depend>
-  <depend>message_runtime</depend>
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
   <depend>python-tk</depend>
   <depend>std_msgs</depend>
-  <depend>rpgatta_msgs</depend>
 </package>

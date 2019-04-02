@@ -8,19 +8,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   message_generation
-  message_runtime
   rospy
   rostest
   std_msgs
-  rpgatta_msgs
 )
 
 catkin_python_setup()
-
-################################################
-## Declare ROS messages, services and actions ##
-################################################
-
 
 # Common services to all post-processors
 add_service_files(
@@ -43,12 +36,7 @@ add_service_files(
     SetTool.srv
     SetZoneData.srv
     WaitDI.srv
-    GenerateRobotProgram.srv
-)
-
-# Motoman specifics
-add_service_files(
-  FILES
+    # Motoman specifics
     Motoman/Arcof.srv
     Motoman/Arcon.srv
     Motoman/DontUseMFrame.srv
@@ -60,12 +48,8 @@ generate_messages(
   DEPENDENCIES
     geometry_msgs
     std_msgs
-    rpgatta_msgs
 )
 
-################################################
-## Declare ROS dynamic reconfigure parameters ##
-################################################
 
 ###################################
 ## catkin specific configuration ##
@@ -78,7 +62,6 @@ catkin_package(
     rospy
     rostest
     std_msgs
-    rpgatta_msgs
 )
 
 #############
@@ -88,9 +71,9 @@ catkin_package(
 # RoboDK post processors git submodule
 install(
   DIRECTORY
-    src/robodk_post_processors/
+    src/ros_robodk_post_processors/robodk_post_processors/
   DESTINATION
-    ${CATKIN_PACKAGE_BIN_DESTINATION}/robodk_post_processors/
+    ${CATKIN_PACKAGE_BIN_DESTINATION}/ros_robodk_post_processors/robodk_post_processors/
 )
 
 install(
@@ -103,9 +86,7 @@ install(
 # Services servers
 install(
   PROGRAMS
-    scripts/services.py
-    scripts/ros_to_ls.py
-    scripts/DummyPathPlanner.py
+    scripts/services
   DESTINATION
     ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from robodk_post_processors.Motoman import Pose
-from robodk_post_processors.robodk import *
+from ros_robodk_post_processors.robodk_post_processors.Motoman import Pose
+from ros_robodk_post_processors.robodk_post_processors.robodk import *
 from ros_robodk_post_processors.srv import *
 import config
 import geometry_msgs.msg
