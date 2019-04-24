@@ -15,9 +15,9 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_python_setup()
 
-# Common services to all post-processors
 add_service_files(
   FILES
+    # Common services to all post-processors
     MoveC.srv
     MoveJ.srv
     MoveL.srv
@@ -36,6 +36,7 @@ add_service_files(
     SetTool.srv
     SetZoneData.srv
     WaitDI.srv
+
     # Motoman specifics
     Motoman/Arcof.srv
     Motoman/Arcon.srv
