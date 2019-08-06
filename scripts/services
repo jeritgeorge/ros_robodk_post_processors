@@ -3,6 +3,7 @@ package = 'ros_robodk_post_processors'
 service_base_name = "/robodk_post_processors/"
 
 from ros_robodk_post_processors.robodk_post_processors.Fanuc_R30iA import RobotPost as FanucR30iAPost
+from ros_robodk_post_processors.robodk_post_processors.Fanuc_R30iB import RobotPost as FanucR30iBPost
 from ros_robodk_post_processors.robodk_post_processors.Motoman import Pose
 from ros_robodk_post_processors.robodk_post_processors.Motoman import RobotPost as MotomanPost
 from ros_robodk_post_processors.robodk_post_processors.robodk import *
@@ -57,15 +58,16 @@ def move_c(req):
 def move_j(req):
     if config.pp is None:
         return [config.pp_not_init]
-
     if len(req.joints) != config.pp.nAxes:
-        return ["Joints tuple does not match the number of axes"]
+        return ["Joints is: " + str(req.joints) +  " but config is: " + str(config.pp.nAxes)]
     if len(req.conf_RLF) != 3:
         return ["conf_RLF size must be 3"]
 
     if not poseInitialized(req.pose):
-        return ["Pose quaternions are not initialized"]
-    p = poseToMat(req.pose)
+        #return ["Pose quaternions are not initialized"]
+        p = None
+    else:
+        p = poseToMat(req.pose)
     config.pp.MoveJ(p, req.joints, list(req.conf_RLF))
     return [""]
 
@@ -146,6 +148,8 @@ def prog_start(req):
     elif req.post_processor == "Fanuc_R30iA":
         config.pp = FanucR30iAPost()
     # New post-processors go here
+    elif req.post_processor == "Fanuc_R30iB":
+        config.pp = FanucR30iBPost()
     else:
         return ["'%s' post processor is not supported" % req.post_processor]
 
