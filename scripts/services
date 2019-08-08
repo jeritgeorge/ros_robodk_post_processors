@@ -12,11 +12,11 @@ from ros_robodk_post_processors import motoman
 from ros_robodk_post_processors.srv import *
 import geometry_msgs.msg
 import trajectory_msgs.msg
-from rpgatta_msgs.msg import MotionPlan
-from rpgatta_msgs.msg import ProcessSegment
-from rpgatta_msgs.msg import TransitionPair
-from rpgatta_msgs.msg import RobotProcessPath
-from rpgatta_msgs.msg import ProcessType
+from tesseract_msgs.msg import ProcessPlan
+from tesseract_msgs.msg import ProcessPlanSegment
+from tesseract_msgs.msg import ProcessPlanTransitionPair
+from tesseract_msgs.msg import ProcessPlanPath
+#from tesseract_msgs.msg import ProcessType
 import rospy
 
 # From geometry_msgs.Pose to RoboDK.Mat
