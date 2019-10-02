@@ -214,14 +214,14 @@ class RobotPost(object):
         header = header + '  LAST_GUN_OFF_LINE\t: 0;' + '\n'
         header = header + '  LAST_PROCESSED_DATE\t: DATE 80-00-00 TIME 00:00:00;' + '\n\n'
 
-        if self.HAS_TURNTABLE:
-            header = header + '/APPL' + '\n'
-            header = header + '' + '\n'
-            header = header + 'LINE_TRACK;' + '\n'
-            header = header + 'LINE_TRACK_SCHEDULE_NUMBER      : 0;' + '\n'
-            header = header + 'LINE_TRACK_BOUNDARY_NUMBER      : 0;' + '\n'
-            header = header + 'CONTINUE_TRACK_AT_PROG_END      : FALSE;' + '\n'
-            header = header + '' + '\n'
+        #if self.HAS_TURNTABLE:
+        header = header + '/APPL' + '\n'
+        header = header + '' + '\n'
+        header = header + 'LINE_TRACK;' + '\n'
+        header = header + 'LINE_TRACK_SCHEDULE_NUMBER      : 0;' + '\n'
+        header = header + 'LINE_TRACK_BOUNDARY_NUMBER      : 0;' + '\n'
+        header = header + 'CONTINUE_TRACK_AT_PROG_END      : FALSE;' + '\n'
+        header = header + '' + '\n'
         header = header + '/MN'
         #header = header + '/MN' + '\n'    # Important! Last line should not have \n
         
