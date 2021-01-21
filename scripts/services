@@ -12,11 +12,6 @@ from ros_robodk_post_processors import motoman
 from ros_robodk_post_processors.srv import *
 import geometry_msgs.msg
 import trajectory_msgs.msg
-from tesseract_msgs.msg import ProcessPlan
-from tesseract_msgs.msg import ProcessPlanSegment
-from tesseract_msgs.msg import ProcessPlanTransitionPair
-from tesseract_msgs.msg import ProcessPlanPath
-#from tesseract_msgs.msg import ProcessType
 import rospy
 
 # From geometry_msgs.Pose to RoboDK.Mat
@@ -56,9 +51,11 @@ def move_c(req):
     return [""]
 
 def move_j(req):
+    print("move_J")
     if config.pp is None:
         return [config.pp_not_init]
     if len(req.joints) != config.pp.nAxes:
+        print("Joints is: " + str(req.joints) +  " but config is: " + str(config.pp.nAxes))
         return ["Joints is: " + str(req.joints) +  " but config is: " + str(config.pp.nAxes)]
     if len(req.conf_RLF) != 3:
         return ["conf_RLF size must be 3"]

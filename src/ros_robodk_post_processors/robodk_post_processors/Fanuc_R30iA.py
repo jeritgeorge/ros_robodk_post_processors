@@ -74,7 +74,7 @@ class RobotPost(object):
     SPEED = '500mm/sec'     # set default cartesian speed motion  
     CNT_VALUE = 'FINE'      # set default CNT value (all motion until smooth value is changed)
     ACTIVE_UF = 9           # Active UFrame Id (register)
-    ACTIVE_UT = 9           # Active UTool Id (register)
+    ACTIVE_UT = 16           # Active UTool Id (register)
     SPARE_PR = 9            # Spare Position register for calculations
 
     # PROG specific variables:
@@ -116,13 +116,12 @@ class RobotPost(object):
     SPEED_BACKUP = None
     LAST_POSE = None
     
-    def __init__(self, robotpost=None, robotname=None, robot_axes = 8, **kwargs):
+    def __init__(self, robotpost=None, robotname=None, robot_axes = 6, **kwargs):
         self.ROBOT_POST = robotpost
         self.ROBOT_NAME = robotname
         self.nAxes = robot_axes
-        self.AXES_TYPE = ['R','R','R','R','R','R','T','T']
+        self.AXES_TYPE = ['R','R','R','R','R','R']
         del self.AXES_TRACK[:]
-        #self.HAS_TRACK = True
         self.PROG = []
         self.PROG_LIST = []
         self.PROG_FILES = []
@@ -198,17 +197,8 @@ class RobotPost(object):
         header = header + '      BUSY_LAMP_OFF\t= 0,' + '\n'
         header = header + '      ABORT_REQUEST\t= 0,' + '\n'
         header = header + '      PAUSE_REQUEST\t= 0;' + '\n'
-        #header = header + 'DEFAULT_GROUP\t= 1,*,*,*,*;' + '\n'  #old controllers
-        header = header + 'DEFAULT_GROUP\t= 1,*,*,*,*,*,*;' + '\n'
+        header = header + 'DEFAULT_GROUP\t= 1,*,*,*,*;' + '\n'  #old controllers
         header = header + 'CONTROL_CODE\t= 00000000 00000000;' + '\n'
-        if self.HAS_TURNTABLE:
-            header = header + '/APPL' + '\n'
-            header = header + '' + '\n'
-            header = header + 'LINE_TRACK;' + '\n'
-            header = header + 'LINE_TRACK_SCHEDULE_NUMBER      : 0;' + '\n'
-            header = header + 'LINE_TRACK_BOUNDARY_NUMBER      : 0;' + '\n'
-            header = header + 'CONTINUE_TRACK_AT_PROG_END      : FALSE;' + '\n'
-            header = header + '' + '\n'
         header = header + '/MN'
         #header = header + '/MN' + '\n'    # Important! Last line should not have \n
         
@@ -347,6 +337,7 @@ class RobotPost(object):
         
         target_id = self.add_target_joints(pose, joints)
         move_ins = 'P[%i] %s %s ;' % (target_id, self.JOINT_SPEED, self.CNT_VALUE)
+        print(move_ins)
         self.addline(move_ins, 'J')
         self.LAST_POSE = pose
         
@@ -393,7 +384,7 @@ class RobotPost(object):
         else:
             self.ACTIVE_UF = frame_id
             self.addline('UFRAME_NUM=%i ;' % (self.ACTIVE_UF))
-            self.RunMessage('UF%i:%.1f,%.1f,%.1f,%.1f,%.1f,%.1f' % (frame_id, xyzwpr[0], xyzwpr[1], xyzwpr[2], xyzwpr[3], xyzwpr[4], xyzwpr[5]), True)
+#            self.RunMessage('UF%i:%.1f,%.1f,%.1f,%.1f,%.1f,%.1f' % (frame_id, xyzwpr[0], xyzwpr[1], xyzwpr[2], xyzwpr[3], xyzwpr[4], xyzwpr[5]), True)
         
     def setTool(self, pose, tool_id=None, tool_name=None):
         """Change the robot TCP"""
@@ -408,7 +399,7 @@ class RobotPost(object):
         else:
             self.ACTIVE_UT = tool_id
             self.addline('UTOOL_NUM=%i ;' % (self.ACTIVE_UT))
-            self.RunMessage('UT%i:%.1f,%.1f,%.1f,%.1f,%.1f,%.1f' % (tool_id, xyzwpr[0], xyzwpr[1], xyzwpr[2], xyzwpr[3], xyzwpr[4], xyzwpr[5]), True)
+#            self.RunMessage('UT%i:%.1f,%.1f,%.1f,%.1f,%.1f,%.1f' % (tool_id, xyzwpr[0], xyzwpr[1], xyzwpr[2], xyzwpr[3], xyzwpr[4], xyzwpr[5]), True)
         
     def Pause(self, time_ms):
         """Pause the robot program"""
