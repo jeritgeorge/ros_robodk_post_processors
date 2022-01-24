@@ -2,7 +2,7 @@
 from ros_robodk_post_processors.robodk_post_processors.Motoman import Pose
 from ros_robodk_post_processors.robodk_post_processors.robodk import *
 from ros_robodk_post_processors.srv import *
-import config
+from ros_robodk_post_processors import config
 import geometry_msgs.msg
 import rospy
 
