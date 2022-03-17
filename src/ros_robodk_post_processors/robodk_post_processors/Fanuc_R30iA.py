@@ -40,6 +40,8 @@
 #     http://www.robodk.com/doc/en/PythonAPI/postprocessor.html
 # ----------------------------------------------------
 
+import ftplib
+
 
 def get_safe_name(progname, max_chars = 10):
     """Get a safe program name"""
@@ -62,7 +64,8 @@ def get_safe_name(progname, max_chars = 10):
 # Import RoboDK tools
 from robodk import *
 import sys
-
+import rospy
+import time
 # ----------------------------------------------------    
 # Object class that handles the robot instructions/syntax
 class RobotPost(object):
@@ -126,6 +129,7 @@ class RobotPost(object):
         self.PROG_LIST = []
         self.PROG_FILES = []
         self.LOG = ''
+        self.FTP = None
         #for k,v in kwargs.iteritems(): # python2
         for k,v in kwargs.items():
             if k == 'lines_x_prog':
@@ -329,7 +333,28 @@ class RobotPost(object):
     def ProgSendRobot(self, robot_ip, remote_path, ftp_user, ftp_pass):
         """Send a program to the robot using the provided parameters. This method is executed right after ProgSave if we selected the option "Send Program to Robot".
         The connection parameters must be provided in the robot connection menu of RoboDK"""
-        UploadFTP(self.PROG_FILES, robot_ip, remote_path, ftp_user, ftp_pass)
+        
+        def connect():
+            try:
+                self.FTP = ftplib.FTP(robot_ip, ftp_user, ftp_pass)
+            except:
+                error_str = sys.exc_info()[1]
+                print("POPUP: <font color=\"red\">Connection to %s failed: <p>%s</p></font>" %
+                    (robot_ip, error_str))
+                rospy.logerr(
+                    "POPUP: <font color=\"red\">Connection to %s failed: <p>%s</p></font>" % (robot_ip, error_str))
+                sys.stdout.flush()
+                time.sleep(4)
+
+        if self.FTP is None:
+            connect()
+        else:
+            try:
+                self.FTP.voidcmd("NOOP")
+            except IOError as e:
+                connect()
+
+        UploadFTP(self.PROG_FILES, robot_ip, remote_path, ftp_user, ftp_pass, self.FTP)
         
     def MoveJ(self, pose, joints, conf_RLF=None):
         """Add a joint movement"""

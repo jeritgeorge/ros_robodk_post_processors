@@ -1204,7 +1204,7 @@ def RemoveDirFTP(ftp, path):
     except ftplib.all_errors as e:
         print('RemoveDirFTP: Could not remove {0}: {1}'.format(path, e))
 
-def UploadDirFTP(localpath, server_ip, remote_path, username, password):
+def UploadDirFTP(localpath, server_ip, remote_path, username, password, myFTP):
     """Upload a folder to a robot through FTP recursively"""
     import ftplib
     import os
@@ -1212,15 +1212,6 @@ def UploadDirFTP(localpath, server_ip, remote_path, username, password):
     main_folder = os.path.basename(os.path.normpath(localpath))    
     print("POPUP: <p>Connecting to <strong>%s</strong> using user name <strong>%s</strong> and password ****</p><p>Please wait...</p>" % (server_ip, username))
     sys.stdout.flush()
-    try:
-        myFTP = ftplib.FTP(server_ip, username, password)
-        print('Connection established')
-    except:
-        error_str = sys.exc_info()[1]
-        print("POPUP: <font color=\"red\">Connection to %s failed: <p>%s</p></font>" % (server_ip,error_str))
-        sys.stdout.flush()
-        pause(4)
-        return False
 
     remote_path_prog = remote_path + '/' + main_folder
     myPath = r'%s' % localpath
@@ -1260,10 +1251,9 @@ def UploadDirFTP(localpath, server_ip, remote_path, username, password):
         myFTP.cwd('..')
         os.chdir('..')
     uploadThis(myPath) # now call the recursive function
-    myFTP.close()
     return True
     
-def UploadFileFTP(file_path_name, server_ip, remote_path, username, password):
+def UploadFileFTP(file_path_name, server_ip, remote_path, username, password, myFTP):
     """Upload a file to a robot through FTP"""
     filepath = getFileDir(file_path_name)
     filename = getBaseName(file_path_name)
@@ -1272,15 +1262,6 @@ def UploadFileFTP(file_path_name, server_ip, remote_path, username, password):
     import sys
     print("POPUP: <p>Connecting to <strong>%s</strong> using user name <strong>%s</strong> and password ****</p><p>Please wait...</p>" % (server_ip, username))
     sys.stdout.flush()
-    try:
-        myFTP = ftplib.FTP(server_ip, username, password)
-    except:
-        error_str = sys.exc_info()[1]
-        print("POPUP: <font color=\"red\">Connection to %s failed: <p>%s</p></font>" % (server_ip,error_str))
-        rospy.logerr("POPUP: <font color=\"red\">Connection to %s failed: <p>%s</p></font>" % (server_ip,error_str))
-        sys.stdout.flush()
-        pause(4)
-        return False
 
     remote_path_prog = remote_path + '/' + filename
     print("POPUP: Connected. Deleting remote file %s..." % remote_path_prog)
@@ -1308,10 +1289,9 @@ def UploadFileFTP(file_path_name, server_ip, remote_path, username, password):
         fh.close()
 
     uploadThis(file_path_name, filename)
-    myFTP.close()
     return True
 
-def UploadFTP(program, robot_ip, remote_path, ftp_user, ftp_pass):
+def UploadFTP(program, robot_ip, remote_path, ftp_user, ftp_pass, ftp):
     """Upload a program or a list of programs to the robot through FTP provided the connection parameters"""
     # Iterate through program list if it is a list of files
     if isinstance(program, list):
@@ -1319,17 +1299,17 @@ def UploadFTP(program, robot_ip, remote_path, ftp_user, ftp_pass):
             print('POPUP: Nothing to transfer')
             return
         for prog in program:
-            UploadFTP(prog, robot_ip, remote_path, ftp_user, ftp_pass)
+            UploadFTP(prog, robot_ip, remote_path, ftp_user, ftp_pass, ftp)
         return
     
     import os
     if os.path.isfile(program):
         print('Sending program file %s...' % program)
         rospy.loginfo('Sending program file %s...' % program)
-        UploadFileFTP(program, robot_ip, remote_path, ftp_user, ftp_pass)
+        UploadFileFTP(program, robot_ip, remote_path, ftp_user, ftp_pass, ftp)
     else:
         print('Sending program folder %s...' % program)
-        UploadDirFTP(program, robot_ip, remote_path, ftp_user, ftp_pass)    
+        UploadDirFTP(program, robot_ip, remote_path, ftp_user, ftp_pass, ftp)    
 
 
 
