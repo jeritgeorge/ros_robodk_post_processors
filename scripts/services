@@ -51,7 +51,6 @@ def move_c(req):
     return [""]
 
 def move_j(req):
-    print("move_J")
     if config.pp is None:
         return [config.pp_not_init]
     if len(req.joints) != config.pp.nAxes:

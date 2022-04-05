@@ -362,7 +362,7 @@ class RobotPost(object):
         
         target_id = self.add_target_joints(pose, joints)
         move_ins = 'P[%i] %s %s ;' % (target_id, self.JOINT_SPEED, self.CNT_VALUE)
-        print(move_ins)
+        # print(move_ins)
         self.addline(move_ins, 'J')
         self.LAST_POSE = pose
         
@@ -765,8 +765,8 @@ def test_post():
     # robot.ProgSave(".","Program",True)
     
     robot.PROG = robot.PROG_LIST.pop()
-    for line in robot.PROG:
-        print(line)
+    # for line in robot.PROG:
+        # print(line)
     
     if len(robot.LOG) > 0:
         mbox('Program generation LOG:\n\n' + robot.LOG)
